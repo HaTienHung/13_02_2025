@@ -2,7 +2,18 @@
 
 namespace App\Providers;
 
+use App\Models\Order;
+use App\Policies\BasePolicy;
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\BaseRepositoryInterface;
+use App\Repositories\BaseRepository;
+use App\Repositories\Product\ProductInterface;
+use App\Repositories\Product\ProductRepository;
+use App\Repositories\Order\OrderRepository;
+use App\Repositories\Order\OrderInterface;
+use App\Repositories\OrderItem\OrderItemInterface;
+use App\Repositories\OrderItem\OrderItemRepository;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
+        $this->app->bind(BaseRepositoryInterface::class, BaseRepository::class);
+        $this->app->bind(ProductInterface::class, ProductRepository::class);
+        $this->app->bind(OrderInterface::class, OrderRepository::class);
+        $this->app->bind(OrderItemInterface::class, OrderItemRepository::class);
     }
 
     /**
@@ -20,5 +35,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        Gate::policy(Order::class, BasePolicy::class);
+        // Gate::policy(Product::class, BasePolicy::class);
+        // Gate::policy(Category::class, BasePolicy::class);
     }
 }
