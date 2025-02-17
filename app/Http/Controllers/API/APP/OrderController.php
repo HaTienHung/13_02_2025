@@ -5,8 +5,7 @@ namespace App\Http\Controllers\Api\App;
 use App\Services\Order\OrderService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
-
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class OrderController extends Controller
 {
@@ -80,7 +79,7 @@ class OrderController extends Controller
       // Lấy user_id từ request hiện tại
       $userId = $request->user()->id;
 
-      $order = $this->orderService->placeOrder($userId, $request->items);
+      $order = $this->orderService->createOrder($userId, $request->items);
       return response()->json([
         'message' => 'Đặt hàng thành công!',
         'order_id' => $order->id
@@ -88,5 +87,166 @@ class OrderController extends Controller
     } catch (\Exception $e) {
       return response()->json(['message' => $e->getMessage()], 400);
     }
+  }
+  /**
+   * @OA\Get(
+   *     path="/api/app/orders/show",
+   *     summary="Lấy danh sách đơn hàng của người dùng hiện tại",
+   *     description="Trả về danh sách đơn hàng của người dùng đang đăng nhập dựa trên token.",
+   *     tags={"APP"},
+   *     security={{"bearerAuth":{}}},
+   *     @OA\Response(
+   *         response=200,
+   *         description="Danh sách đơn hàng của người dùng",
+   *         @OA\JsonContent(
+   *             type="array",
+   *             @OA\Items(
+   *                 type="object",
+   *                 @OA\Property(property="id", type="integer", description="ID đơn hàng"),
+   *                 @OA\Property(property="user_id", type="integer", description="ID người dùng"),
+   *                 @OA\Property(property="total_price", type="string", description="Tổng giá trị đơn hàng"),
+   *                 @OA\Property(property="status", type="string", description="Trạng thái đơn hàng"),
+   *                 @OA\Property(property="created_at", type="string", format="date-time", description="Thời gian tạo đơn hàng"),
+   *                 @OA\Property(property="updated_at", type="string", format="date-time", description="Thời gian cập nhật đơn hàng")
+   *             )
+   *         )
+   *     ),
+   *     @OA\Response(
+   *         response=401,
+   *         description="Chưa xác thực (token không hợp lệ hoặc thiếu)",
+   *     ),
+   *     @OA\Response(
+   *         response=404,
+   *         description="Không tìm thấy đơn hàng",
+   *     )
+   * )
+   */
+  public function show(Request $request)
+  {
+    try {
+      // Lấy user_id từ user đang đăng nhập
+      $authUserId = auth()->id();
+
+      // Gọi service để lấy đơn hàng của người dùng
+      $orders = $this->orderService->getOrdersByUserID($authUserId);
+
+      // Kiểm tra nếu không có đơn hàng
+      if ($orders->isEmpty()) {
+        return response()->json(['message' => 'Đơn hàng chưa có sản phẩm'], 404);
+      }
+
+      // Trả về danh sách đơn hàng của người dùng
+      return response()->json(['message' => 'Đơn hàng của bạn', 'orders' => $orders]);
+    } catch (\Exception $e) {
+      // Xử lý khi có lỗi
+      return response()->json(['message' => $e->getMessage()], 500);
+    }
+  }
+
+  /**
+   * @OA\Put(
+   *     path="/api/app/orders/update/{id}",
+   *     summary="Cập nhật thông tin đơn hàng",
+   *     security={{"bearerAuth":{}}},
+   *     tags={"APP"},
+   *     description="Cập nhật thông tin đơn hàng dựa trên ID",
+   *     @OA\Parameter(
+   *         name="id",
+   *         in="path",
+   *         description="ID của đơn hàng",
+   *         required=true,
+   *         @OA\Schema(type="integer")
+   *     ),
+   *     @OA\RequestBody(
+   *         required=true,
+   *         @OA\JsonContent(
+   *             required={"items"},
+   *             @OA\Property(
+   *                 property="items",
+   *                 type="array",
+   *                 description="Danh sách sản phẩm trong đơn hàng",
+   *                 @OA\Items(
+   *                     type="object",
+   *                     @OA\Property(property="product_id", type="integer", example=5, description="ID sản phẩm"),
+   *                     @OA\Property(property="quantity", type="integer", example=2, description="Số lượng sản phẩm")
+   *                 )
+   *             )
+   *         )
+   *     ),
+   *     @OA\Response(
+   *         response=200,
+   *         description="Đơn hàng đã được cập nhật thành công",
+   *         @OA\JsonContent(
+   *             @OA\Property(property="message", type="string", example="Đơn hàng đã được cập nhật thành công")
+   *         )
+   *     ),
+   *     @OA\Response(
+   *         response=404,
+   *         description="Không tìm thấy đơn hàng",
+   *         @OA\JsonContent(
+   *             @OA\Property(property="message", type="string", example="Không tìm thấy đơn hàng")
+   *         )
+   *     ),
+   *     @OA\Response(
+   *         response=400,
+   *         description="Dữ liệu không hợp lệ",
+   *         @OA\JsonContent(
+   *             @OA\Property(property="message", type="string", example="Dữ liệu không hợp lệ")
+   *         )
+   *     )
+   * )
+   */
+  public function update(Request $request, $orderId)
+  {
+    // Validate các trường thông tin đầu vào
+    $request->validate([
+      'items' => 'required|array', // Đảm bảo items là mảng
+      'items.*.product_id' => 'required|integer|min:1|exists:products,id', // Kiểm tra sản phẩm tồn tại trong bảng products
+      'items.*.quantity' => 'required|integer|min:1', // Kiểm tra số lượng hợp lệ cho từng sản phẩm
+    ]);
+
+    // Truyền userId (auth()->id()) và items từ request vào phương thức updateOrder
+    $order = $this->orderService->updateOrder(auth()->id(), $orderId, $request->items);
+
+    if (!$order) {
+      return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
+    }
+
+    return response()->json([
+      'message' => 'Đơn hàng đã được cập nhật thành công',
+      'order' => $order
+    ]);
+  }
+  /**
+   * @OA\Delete(
+   *     path="/api/app/orders/delete/{id}",
+   *     tags={"APP"},
+   *     summary="Xóa đơn hàng",
+   *     security={{"bearerAuth":{}}},
+   *     description="Xóa đơn hàng khỏi hệ thống",
+   *     @OA\Parameter(
+   *         name="id",
+   *         in="path",
+   *         description="ID của đơn hàng",
+   *         required=true,
+   *         @OA\Schema(type="integer")
+   *     ),
+   *     @OA\Response(
+   *         response=200,
+   *         description="đơn hàng đã được xoá",
+   *         @OA\JsonContent(
+   *             @OA\Property(property="message", type="string", example="đơn hàng đã được xoá thành công")
+   *         )
+   *     ),
+   *     @OA\Response(response=404, description="Không tìm thấy đơn hàng")
+   * )
+   */
+  public function destroy($orderId)
+  {
+    $order = $this->orderService->deleteOrder(auth()->id(), $orderId);
+    if (!$order) {
+      return response()->json(['message' => "Không tìm thấy đơn hàng"], 404);
+    }
+    return response()->json(['message' => 'Đơn hàng đã được xoá thành công']);
   }
 }

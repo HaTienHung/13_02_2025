@@ -117,7 +117,7 @@ class OrderControllerV2 extends Controller
             ]);
 
             // Gọi service để xử lý đơn hàng
-            $order = $this->orderService->placeOrder($user->id, $request->items);
+            $order = $this->orderService->createOrder($user->id, $request->items);
 
             return response()->json([
                 'message' => 'Admin tạo đơn hàng thành công!',

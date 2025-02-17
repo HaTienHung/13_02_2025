@@ -3,7 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Order;
-use App\Policies\BasePolicy;
+use App\Policies\OrderPolicy;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\BaseRepositoryInterface;
 use App\Repositories\BaseRepository;
@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
-        Gate::policy(Order::class, BasePolicy::class);
+        Gate::policy(Order::class, OrderPolicy::class);
         // Gate::policy(Product::class, BasePolicy::class);
         // Gate::policy(Category::class, BasePolicy::class);
     }

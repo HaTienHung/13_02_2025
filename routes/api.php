@@ -19,8 +19,12 @@ Route::post('login', [AuthController::class, 'login']);
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
-Route::middleware('auth:sanctum')->post('/app/orders/create', [OrderController::class, 'store'])
-    ->name('order.store');
+
+Route::prefix('app')->group(function () {
+    Route::group(['middleware' => ['auth:sanctum', 'role:user']], function () {
+        \App\Helpers\RouteHelper::includeRouteFiles(__DIR__ . '/app');
+    });
+});
 
 Route::prefix('cms')->group(function () {
     Route::group(['middleware' => ['auth:sanctum', 'role:admin']], function () {

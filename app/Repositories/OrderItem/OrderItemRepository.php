@@ -11,6 +11,12 @@ class OrderItemRepository extends BaseRepository implements OrderItemInterface
   {
     parent::__construct($orderItem);
   }
-
-  // Có thể thêm các phương thức đặc biệt riêng cho Product nếu cần
+  public function getItemsByOrderId($orderId)
+  {
+    return $this->model->where('order_id', $orderId)->get();
+  }
+  public function deleteByOrderId($orderId)
+  {
+    return $this->model->where('order_id', $orderId)->delete();
+  }
 }
