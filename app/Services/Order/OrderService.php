@@ -6,6 +6,7 @@ use App\Repositories\Order\OrderInterface;
 use App\Repositories\Product\ProductInterface;
 use App\Repositories\OrderItem\OrderItemInterface;
 use App\Repositories\Inventory\InventoryRepository;
+use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +26,7 @@ class OrderService
    * @param OrderItemInterface $orderItemRepository
    * @param InventoryRepository $inventoryRepository
    */
+
   public function __construct(
     OrderInterface $orderRepository,
     ProductInterface $productRepository,
@@ -36,6 +38,7 @@ class OrderService
     $this->orderItemRepository = $orderItemRepository;
     $this->inventoryRepository = $inventoryRepository;
   }
+
   public function processOrder($userId, $items, $order = null)
   {
     DB::beginTransaction();
@@ -88,6 +91,7 @@ class OrderService
       throw new \Exception($e->getMessage());
     }
   }
+
   public function getAllOrders() //Only Admin
   {
     return $this->orderRepository->all();
@@ -98,25 +102,22 @@ class OrderService
     // Gọi repository để lấy đơn hàng của người dùng
     return $this->orderRepository->getOrdersByUserID($userId);
   }
+
   public function createOrder($userId, $items)
   {
     return $this->processOrder($userId, $items);
   }
 
-  public function updateOrder($userId, $orderId, $items)
+  public function updateOrder($userId, $orderId, $items, $status = null)
   {
     DB::beginTransaction();
     try {
       // Tìm đơn hàng cần cập nhật
       $order = $this->orderRepository->find($orderId);
 
-      if (!$order) {
-        throw new \Exception("Đơn hàng không tồn tại.");
-      }
-
       // Kiểm tra quyền: Chỉ user sở hữu đơn hàng mới có quyền cập nhật
-      if ($order->user_id !== $userId) {
-        throw new \Exception("Bạn không có quyền sửa đơn hàng này.");
+      if ($order->user_id !== $userId && !auth()->user()->isAdmin()) {
+        throw new \Exception("Bạn không có quyền sửa đơn hàng này.", 403);
       }
 
       $totalPrice = 0;
@@ -192,28 +193,32 @@ class OrderService
       }
 
       // Cập nhật tổng giá trị đơn hàng
-      $this->orderRepository->update($order->id, ['total_price' => $totalPrice]);
-      $order = $this->orderRepository->find($order->id); // Load lại từ DB
+      $updateData = ['total_price' => $totalPrice];
+
+      // Nếu admin gửi trạng thái mới, cập nhật luôn
+      if ($status !== null) {
+        $updateData['status'] = $status;
+      }
+
+      $this->orderRepository->update($order->id, $updateData);
       DB::commit();
+      $order = $this->orderRepository->find($order->id);
       return $order;
-    } catch (\Exception $e) {
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
       DB::rollBack();
-      throw new \Exception($e->getMessage());
+      throw new \Exception("Không tìm thấy đơn hàng.", 404);
     }
   }
-  public function deleteOrder($userId, $orderId)
+  public function deleteOrder($orderId)
   {
     DB::beginTransaction();
     try {
-      // Lấy thông tin đơn hàng
+      // Lấy thông tin đơn hàng, nếu không tìm thấy sẽ ném ModelNotFoundException
       $order = $this->orderRepository->find($orderId);
-      // Kiểm tra quyền: Chỉ user sở hữu đơn hàng mới có quyền cập nhật
-      if ($order->user_id !== $userId) {
-        throw new \Exception("Bạn không có quyền xoá đơn hàng này.");
-      }
 
-      if (!$order) {
-        throw new \Exception("Đơn hàng không tồn tại.");
+      // Kiểm tra quyền: chỉ user sở hữu hoặc admin mới có quyền xoá
+      if ($order->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
+        throw new \Exception("Bạn không có quyền xoá đơn hàng này.", 403);
       }
 
       // Lấy danh sách sản phẩm trong đơn hàng
@@ -232,9 +237,9 @@ class OrderService
 
       DB::commit();
       return true;
-    } catch (\Exception $e) {
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
       DB::rollBack();
-      throw new \Exception($e->getMessage());
+      throw new \Exception("Không tìm thấy đơn hàng.", 404);
     }
   }
 }

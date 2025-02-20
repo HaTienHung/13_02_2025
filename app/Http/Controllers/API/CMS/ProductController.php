@@ -183,13 +183,11 @@ class ProductController extends Controller
    */
   public function destroy(Request $request, $id)
   {
-    $product = $this->productService->deleteProduct($id);
-    if (!$product) {
-      return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
+    try {
+      $this->productService->deleteProduct($id);
+      return response()->json(['message' => 'Sản phẩm đã được xóa thành công'], 200);
+    } catch (ModelNotFoundException $e) {
+      return response()->json(['message' => 'Sản phẩm không tồn tại'], 404);
     }
-
-    $product->delete();
-
-    return response()->json(['message' => 'Sản phẩm đã được xoá thành công']);
   }
 }

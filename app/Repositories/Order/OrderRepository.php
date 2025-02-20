@@ -13,7 +13,7 @@ class OrderRepository extends BaseRepository implements OrderInterface
   }
   public function getOrdersByUserID($userId)
   {
-    return $this->model->where('user_id', $userId)->get(); //Lấy tất cả các đơn hàng của người dùng
+    return $this->model->where('user_id', $userId)->with('orderItems.product')->get(); //Lấy tất cả các đơn hàng của người dùng
   }
   // Có thể thêm các phương thức đặc biệt riêng cho Product nếu cần
 }

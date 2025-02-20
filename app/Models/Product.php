@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
  * @OA\Schema(
  *     schema="Product",
  *     type="object",
- *     @OA\Property(property="id", type="integer"),
  *     @OA\Property(property="name", type="string"),
  *     @OA\Property(property="price", type="number", format="float"),
  *     @OA\Property(property="category_id", type="integer"),

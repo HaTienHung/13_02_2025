@@ -3,6 +3,7 @@
 namespace App\Services\Product;
 
 use App\Repositories\Product\ProductInterface;
+use Exception;
 
 class ProductService
 {
@@ -35,6 +36,17 @@ class ProductService
 
   public function deleteProduct($id)
   {
-    return $this->productRepository->delete($id);
+    $product = $this->productRepository->find($id);
+
+    if (!$product) {
+      throw new Exception('Sản phẩm không tồn tại', 404);
+    }
+
+    // Thực hiện xóa Sản phẩm
+    if (!$this->productRepository->delete($id)) {
+      throw new Exception('Xóa Sản phẩm thất bại', 500);
+    }
+
+    return true;
   }
 }

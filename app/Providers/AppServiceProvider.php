@@ -7,6 +7,8 @@ use App\Policies\OrderPolicy;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\BaseRepositoryInterface;
 use App\Repositories\BaseRepository;
+use App\Repositories\Category\CategoryInterface;
+use App\Repositories\Category\CategoryRepository;
 use App\Repositories\Product\ProductInterface;
 use App\Repositories\Product\ProductRepository;
 use App\Repositories\Order\OrderRepository;
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProductInterface::class, ProductRepository::class);
         $this->app->bind(OrderInterface::class, OrderRepository::class);
         $this->app->bind(OrderItemInterface::class, OrderItemRepository::class);
+        $this->app->bind(CategoryInterface::class, CategoryRepository::class);
     }
 
     /**
@@ -35,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
-        Gate::policy(Order::class, OrderPolicy::class);
+        // Gate::policy(Order::class, OrderPolicy::class);
         // Gate::policy(Product::class, BasePolicy::class);
         // Gate::policy(Category::class, BasePolicy::class);
     }

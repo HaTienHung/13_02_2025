@@ -1,9 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\Cms\ProductController;
+use App\Http\Controllers\Api\Cms\CategoryController;
 use App\Http\Controllers\Api\App\AuthController;
-use App\Http\Controllers\Api\Cms\OrderControllerV2;
-use App\Http\Controllers\Api\App\OrderController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,9 +15,12 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::post('login', [AuthController::class, 'login']);
-
+//Products
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+//Categories
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+Route::get('/categories/{id}/products', [CategoryController::class, 'getProductsByCategory'])->name('categories.products');
 
 Route::prefix('app')->group(function () {
     Route::group(['middleware' => ['auth:sanctum', 'role:user']], function () {

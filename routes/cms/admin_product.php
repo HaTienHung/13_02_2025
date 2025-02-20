@@ -8,4 +8,5 @@ Route::prefix('product')->group(function () {
   Route::post('/create', [ProductController::class, 'store'])->name('cms.products.store');
   Route::put('/update/{id}', [ProductController::class, 'update'])->name('cms.products.update');
   Route::delete('/delete/{id}', [ProductController::class, 'destroy'])->name('cms.products.destroy');
+  // Route::apiResource('/', ProductController::class);
 });

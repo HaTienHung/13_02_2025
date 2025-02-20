@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\App;
 use App\Services\Order\OrderService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\OrderResource;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class OrderController extends Controller
@@ -136,13 +137,15 @@ class OrderController extends Controller
       }
 
       // Trả về danh sách đơn hàng của người dùng
-      return response()->json(['message' => 'Đơn hàng của bạn', 'orders' => $orders]);
+      return response()->json([
+        'message' => 'Đơn hàng của bạn',
+        'orders' => OrderResource::collection($orders)
+      ]);
     } catch (\Exception $e) {
       // Xử lý khi có lỗi
       return response()->json(['message' => $e->getMessage()], 500);
     }
   }
-
   /**
    * @OA\Put(
    *     path="/api/app/orders/update/{id}",
@@ -243,7 +246,7 @@ class OrderController extends Controller
    */
   public function destroy($orderId)
   {
-    $order = $this->orderService->deleteOrder(auth()->id(), $orderId);
+    $order = $this->orderService->deleteOrder($orderId);
     if (!$order) {
       return response()->json(['message' => "Không tìm thấy đơn hàng"], 404);
     }
