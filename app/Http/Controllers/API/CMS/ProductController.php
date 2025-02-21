@@ -23,6 +23,11 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class ProductController extends Controller
 {
   protected $productService;
+  /**
+   * Khởi tạo ProductController.
+   * 
+   * @param ProductService $productService
+   */
 
   public function __construct(ProductService $productService)
   {

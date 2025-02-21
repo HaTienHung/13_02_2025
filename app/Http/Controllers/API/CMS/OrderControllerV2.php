@@ -6,6 +6,7 @@ use App\Services\Order\OrderService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class OrderControllerV2 extends Controller
@@ -109,22 +110,28 @@ class OrderControllerV2 extends Controller
             'items.*.quantity' => 'required|integer|min:1'
         ]);
 
+        DB::beginTransaction();
         try {
-            // Tạo user mới thay vì nhập user_id
+            // Tạo user mới trong transaction
             $user = User::create([
                 'name' => $request->user_name,
                 'email' => $request->user_email,
-                'password' => bcrypt('password') // Tạo mật khẩu ngẫu nhiên
+                'password' => bcrypt('password') // Tạo mật khẩu mặc định
             ]);
 
             // Gọi service để xử lý đơn hàng
             $order = $this->orderService->createOrder($user->id, $request->items);
+
+            // Nếu không lỗi, commit transaction
+            DB::commit();
 
             return response()->json([
                 'message' => 'Admin tạo đơn hàng thành công!',
                 'order_id' => $order->id
             ], 201);
         } catch (\Exception $e) {
+            // Nếu có lỗi, rollback lại tất cả thay đổi (bao gồm xóa user)
+            DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 400);
         }
     }

@@ -579,6 +579,119 @@
                 ]
             }
         },
+        "/api/cms/inventories/create": {
+            "post": {
+                "tags": [
+                    "CMS Inventories"
+                ],
+                "summary": "Import Product To Inventory",
+                "operationId": "358f9a7a4248cc78d5c4757e934f5f73",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "quantity": {
+                                        "type": "number",
+                                        "example": 40
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Imported Product",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Inventory"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cms/inventories/show/{id}": {
+            "get": {
+                "tags": [
+                    "CMS Inventories"
+                ],
+                "summary": "Get stock by productID",
+                "operationId": "fc7743e6e590084533c097d591c18696",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID của sản phẩm",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A product detail",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Inventory"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cms/inventories/show": {
+            "get": {
+                "tags": [
+                    "CMS Inventories"
+                ],
+                "summary": "Get stock report",
+                "operationId": "5e325a367bfe094d66a2fd5c1b9c1757",
+                "responses": {
+                    "200": {
+                        "description": "Stock Report",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Inventory"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/cms/orders/": {
             "get": {
                 "tags": [
@@ -1105,6 +1218,20 @@
                 },
                 "type": "object"
             },
+            "Inventory": {
+                "properties": {
+                    "product_id": {
+                        "type": "integer"
+                    },
+                    "type": {
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "type": "integer"
+                    }
+                },
+                "type": "object"
+            },
             "Order": {
                 "properties": {
                     "user_id": {
@@ -1155,6 +1282,10 @@
         {
             "name": "CMS Categories",
             "description": "CMS Categories"
+        },
+        {
+            "name": "CMS Inventories",
+            "description": "CMS Inventories"
         },
         {
             "name": "CMS Order",

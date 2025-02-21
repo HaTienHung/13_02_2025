@@ -6,9 +6,7 @@ use App\Repositories\Order\OrderInterface;
 use App\Repositories\Product\ProductInterface;
 use App\Repositories\OrderItem\OrderItemInterface;
 use App\Repositories\Inventory\InventoryRepository;
-use Exception;
-use Illuminate\Auth\Access\AuthorizationException;
-use Illuminate\Support\Facades\Auth;
+use App\Services\Inventory\InventoryService;
 use Illuminate\Support\Facades\DB;
 
 class OrderService
@@ -17,6 +15,7 @@ class OrderService
   protected $orderRepository;
   protected $orderItemRepository;
   protected $inventoryRepository;
+  protected $inventoryService;
 
   /**
    * Khởi tạo OrderService.
@@ -25,71 +24,19 @@ class OrderService
    * @param ProductRepositoryInterface $productRepository
    * @param OrderItemInterface $orderItemRepository
    * @param InventoryRepository $inventoryRepository
+   * @param InventoryService $inventorySerivice
    */
 
   public function __construct(
     OrderInterface $orderRepository,
     ProductInterface $productRepository,
     OrderItemInterface $orderItemRepository,
-    InventoryRepository $inventoryRepository
+    InventoryService $inventoryService
   ) {
     $this->orderRepository = $orderRepository;
     $this->productRepository = $productRepository;
     $this->orderItemRepository = $orderItemRepository;
-    $this->inventoryRepository = $inventoryRepository;
-  }
-
-  public function processOrder($userId, $items, $order = null)
-  {
-    DB::beginTransaction();
-    try {
-      // Nếu không phải sửa đơn hàng, tạo mới
-      if (!$order) {
-        $order = $this->orderRepository->create([
-          'user_id' => $userId,
-          'status' => 'pending',
-          'total_price' => 0
-        ]);
-      }
-
-      $totalPrice = 0;
-
-      foreach ($items as $item) {
-        $product = $this->productRepository->find($item['product_id']);
-
-        if (!$product) {
-          throw new \Exception("Sản phẩm không tồn tại.");
-        }
-
-        $stock = $this->inventoryRepository->getStock($product['id']);
-        if ($stock < $item['quantity']) {
-          throw new \Exception("Sản phẩm {$product->name} không đủ hàng trong kho.");
-        }
-
-        // Nếu sửa đơn hàng thì cần giảm bớt số lượng kho trước khi thay đổi
-        if ($order->id) {
-          $this->inventoryRepository->reduceStock($product['id'], $item['quantity']);
-        }
-
-        $itemTotal = $product->price * $item['quantity'];
-        $totalPrice += $itemTotal;
-
-        $this->orderItemRepository->create([
-          'order_id' => $order->id,
-          'product_id' => $product->id,
-          'quantity' => $item['quantity'],
-          'price' => $product->price
-        ]);
-      }
-
-      $this->orderRepository->update($order->id, ['total_price' => $totalPrice]);
-
-      DB::commit();
-      return $order;
-    } catch (\Exception $e) {
-      DB::rollBack();
-      throw new \Exception($e->getMessage());
-    }
+    $this->inventoryService = $inventoryService;
   }
 
   public function getAllOrders() //Only Admin
@@ -105,7 +52,53 @@ class OrderService
 
   public function createOrder($userId, $items)
   {
-    return $this->processOrder($userId, $items);
+    DB::beginTransaction();
+    try {
+      // Tạo đơn hàng mới
+      $order = $this->orderRepository->create([
+        'user_id' => $userId,
+        'status' => 'pending',
+        'total_price' => 0
+      ]);
+
+      $totalPrice = 0;
+
+      foreach ($items as $item) {
+        $product = $this->productRepository->find($item['product_id']);
+
+        if (!$product) {
+          throw new \Exception("Sản phẩm không tồn tại.");
+        }
+
+        $stock = $this->inventoryService->getStock($product->id);
+        if ($stock < $item['quantity']) {
+          throw new \Exception("Sản phẩm {$product->name} không đủ hàng trong kho.");
+        }
+
+        // Giảm số lượng tồn kho
+        $this->inventoryService->reduceStock($product->id, $item['quantity']);
+
+        $itemTotal = $product->price * $item['quantity'];
+        $totalPrice += $itemTotal;
+
+        // Thêm sản phẩm vào OrderItem
+        $this->orderItemRepository->create([
+          'order_id' => $order->id,
+          'product_id' => $product->id,
+          'quantity' => $item['quantity'],
+          'price' => $product->price
+        ]);
+      }
+
+      // Cập nhật tổng giá trị đơn hàng
+      $this->orderRepository->update($order->id, ['total_price' => $totalPrice]);
+
+      DB::commit();
+      return $order;
+    } catch (\Exception $e) {
+      DB::rollBack();
+      throw new \Exception($e->getMessage());
+    }
   }
 
   public function updateOrder($userId, $orderId, $items, $status = null)
@@ -118,6 +111,11 @@ class OrderService
       // Kiểm tra quyền: Chỉ user sở hữu đơn hàng mới có quyền cập nhật
       if ($order->user_id !== $userId && !auth()->user()->isAdmin()) {
         throw new \Exception("Bạn không có quyền sửa đơn hàng này.", 403);
+      }
+
+      // Kiểm tra trạng thái đơn hàng (chỉ cho phép sửa khi đơn hàng đang 'pending')
+      if ($order->status !== 'pending' && !auth()->user()->isAdmin()) {
+        throw new \Exception("Chỉ có thể sửa đơn hàng khi đang ở trạng thái 'pending'.", 403);
       }
 
       $totalPrice = 0;
@@ -151,14 +149,14 @@ class OrderService
           $difference = $newQuantity - $oldQuantity;
           if ($difference > 0) {
             // Nếu số lượng tăng, kiểm tra kho
-            $stock = $this->inventoryRepository->getStock($productId);
+            $stock = $this->inventoryService->getStock($productId);
             if ($stock < $difference) {
               throw new \Exception("Sản phẩm {$product->name} không đủ hàng trong kho.");
             }
-            $this->inventoryRepository->reduceStock($productId, $difference);
+            $this->inventoryService->reduceStock($productId, $difference);
           } elseif ($difference < 0) {
             // Nếu số lượng giảm, hoàn lại hàng vào kho
-            $this->inventoryRepository->addStock($productId, abs($difference));
+            $this->inventoryService->addStock($productId, abs($difference));
           }
 
           // Cập nhật order item
@@ -168,11 +166,11 @@ class OrderService
           ]);
         } else {
           // Nếu sản phẩm chưa có, thêm mới vào order_items
-          $stock = $this->inventoryRepository->getStock($productId);
+          $stock = $this->inventoryService->getStock($productId);
           if ($stock < $newQuantity) {
             throw new \Exception("Sản phẩm {$product->name} không đủ hàng trong kho.");
           }
-          $this->inventoryRepository->reduceStock($productId, $newQuantity);
+          $this->inventoryService->reduceStock($productId, $newQuantity);
 
           $this->orderItemRepository->create([
             'order_id' => $order->id,
@@ -187,7 +185,7 @@ class OrderService
       foreach ($existingItems as $existingItem) {
         if (!in_array($existingItem->product_id, array_column($items, 'product_id'))) {
           // Hoàn lại hàng vào kho trước khi xóa
-          $this->inventoryRepository->addStock($existingItem->product_id, $existingItem->quantity);
+          $this->inventoryService->addStock($existingItem->product_id, $existingItem->quantity);
           $this->orderItemRepository->delete($existingItem->id);
         }
       }
@@ -226,7 +224,7 @@ class OrderService
 
       // Khôi phục lại số lượng sản phẩm trong kho trước khi xoá
       foreach ($orderItems as $item) {
-        $this->inventoryRepository->addStock($item->product_id, $item->quantity);
+        $this->inventoryService->addStock($item->product_id, $item->quantity);
       }
 
       // Xoá tất cả order items liên quan đến đơn hàng

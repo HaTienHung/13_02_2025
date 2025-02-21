@@ -5,6 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @OA\Schema(
+ *     schema="Inventory",
+ *     type="object",
+ *     @OA\Property(property="product_id", type="integer"),
+ *     @OA\Property(property="type", type="string"),
+ *     @OA\Property(property="quantity", type="integer"),
+ * )
+ */
+
 class InventoryTransaction extends Model
 {
     use HasFactory;
