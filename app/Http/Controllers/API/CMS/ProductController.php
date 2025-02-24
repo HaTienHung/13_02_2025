@@ -85,7 +85,7 @@ class ProductController extends Controller
   /**
    * @OA\Post(
    *     path="/api/cms/product/create",
-   *     tags={"CMS Product"},
+   *     tags={"CMS Products"},
    *     summary="Create a new product",
    *     security={{"bearerAuth":{}}},
    *     @OA\RequestBody(
@@ -114,7 +114,7 @@ class ProductController extends Controller
    *     path="/api/cms/product/update/{id}",
    *     summary="Cập nhật sản phẩm",
    *     security={{"bearerAuth":{}}},
-   *     tags={"CMS Product"},
+   *     tags={"CMS Products"},
    *     description="Cập nhật thông tin sản phẩm dựa trên ID",
    *     @OA\Parameter(
    *         name="id",
@@ -165,7 +165,7 @@ class ProductController extends Controller
   /**
    * @OA\Delete(
    *     path="/api/cms/product/delete/{id}",
-   *     tags={"CMS Product"},
+   *     tags={"CMS Products"},
    *     summary="Xóa sản phẩm",
    *     security={{"bearerAuth":{}}},
    *     description="Xóa sản phẩm khỏi hệ thống",

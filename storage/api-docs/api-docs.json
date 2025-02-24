@@ -60,6 +60,343 @@
                 }
             }
         },
+        "/api/app/cart": {
+            "get": {
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Lấy giỏ hàng",
+                "description": "Lấy giỏ hàng của người dùng",
+                "operationId": "4347ff5a19d81b7e5f81697065fac31a",
+                "responses": {
+                    "200": {
+                        "description": "Danh sách sản phẩm trong giỏ hàng"
+                    },
+                    "401": {
+                        "description": "Chưa xác thực"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/app/cart/store": {
+            "post": {
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Thêm sản phẩm vào giỏ hàng",
+                "description": "Thêm sản phẩm vào giỏ hàng",
+                "operationId": "8fd36d3ad1133dcd2de9467fbe3cf9bb",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Sản phẩm đã được thêm vào giỏ hàng"
+                    },
+                    "400": {
+                        "description": "Dữ liệu không hợp lệ"
+                    },
+                    "401": {
+                        "description": "Chưa xác thực"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/app/cart/update": {
+            "put": {
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Cập nhật giỏ hàng",
+                "description": "Cập nhật số lượng sản phẩm trong giỏ hàng",
+                "operationId": "b9d1747da76a4320f6ada4b1a79753ec",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_id",
+                                    "quantity"
+                                ],
+                                "properties": {
+                                    "product_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 3
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Cập nhật số lượng thành công"
+                    },
+                    "400": {
+                        "description": "Dữ liệu không hợp lệ"
+                    },
+                    "401": {
+                        "description": "Chưa xác thực"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/app/cart/delete": {
+            "delete": {
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Xóa nhiều sản phẩm khỏi giỏ hàng",
+                "description": "Xóa một hoặc nhiều sản phẩm khỏi giỏ hàng của người dùng đã đăng nhập.",
+                "operationId": "6e614b2b5c4ab05480bb47ec11124647",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "product_ids"
+                                ],
+                                "properties": {
+                                    "product_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Xóa sản phẩm thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Xóa sản phẩm thành công."
+                                        },
+                                        "deleted_count": {
+                                            "type": "integer",
+                                            "example": 3
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Chưa đăng nhập",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/app/cart/clear": {
+            "delete": {
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Dọn sạch giỏ hàng",
+                "description": "Xóa toàn bộ giỏ hàng",
+                "operationId": "829aab107b3ecaa84092e5dd18cfed5b",
+                "responses": {
+                    "200": {
+                        "description": "Giỏ hàng đã được dọn sạch"
+                    },
+                    "401": {
+                        "description": "Chưa xác thực"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/app/cart/checkout": {
+            "post": {
+                "tags": [
+                    "Cart"
+                ],
+                "summary": "Đặt hàng từ giỏ hàng",
+                "description": "Người dùng có thể đặt hàng các sản phẩm từ giỏ hàng của mình.",
+                "operationId": "0c46ab596de32fb683649e8c1ce88236",
+                "requestBody": {
+                    "description": "Danh sách ID sản phẩm cần đặt hàng",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "product_ids": {
+                                        "description": "Mảng chứa ID của các sản phẩm cần đặt hàng",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Đặt hàng thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Đặt hàng thành công"
+                                        },
+                                        "order": {
+                                            "description": "Thông tin đơn hàng",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Dữ liệu không hợp lệ."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Lỗi server",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Có lỗi xảy ra, vui lòng thử lại sau."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/app/orders/create": {
             "post": {
                 "tags": [
@@ -159,6 +496,81 @@
                 "responses": {
                     "200": {
                         "description": "Danh sách đơn hàng của người dùng",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "description": "ID đơn hàng",
+                                                "type": "integer"
+                                            },
+                                            "user_id": {
+                                                "description": "ID người dùng",
+                                                "type": "integer"
+                                            },
+                                            "total_price": {
+                                                "description": "Tổng giá trị đơn hàng",
+                                                "type": "string"
+                                            },
+                                            "status": {
+                                                "description": "Trạng thái đơn hàng",
+                                                "type": "string"
+                                            },
+                                            "created_at": {
+                                                "description": "Thời gian tạo đơn hàng",
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "updated_at": {
+                                                "description": "Thời gian cập nhật đơn hàng",
+                                                "type": "string",
+                                                "format": "date-time"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Chưa xác thực (token không hợp lệ hoặc thiếu)"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy đơn hàng"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/app/orders/show/{id}": {
+            "get": {
+                "tags": [
+                    "APP"
+                ],
+                "summary": "Lấy chi tiết đơn hàng của người dùng",
+                "description": "Trả về chi tiết đơn hàng của người dùng.",
+                "operationId": "c5eb644870f68edcbddd945283360dce",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID của đơn hàng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chi tiết đơn hàng của người dùng",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -692,10 +1104,47 @@
                 ]
             }
         },
+        "/api/cms/inventories/show/{id}/transactions": {
+            "get": {
+                "tags": [
+                    "CMS Inventories"
+                ],
+                "summary": "Get Inventory Records of a Product",
+                "operationId": "6409ab4f7dc58e5e67987d7c6f1bdfc2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID của sản phẩm",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of inventory transactions for the product",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Inventory"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/cms/orders/": {
             "get": {
                 "tags": [
-                    "CMS Order"
+                    "CMS Orders"
                 ],
                 "summary": "Get list of orders",
                 "operationId": "733fdd7ded28d510e382f98724e7030e",
@@ -721,10 +1170,85 @@
                 ]
             }
         },
+        "/api/cms/orders/show/{id}": {
+            "get": {
+                "tags": [
+                    "CMS Orders"
+                ],
+                "summary": "Lấy chi tiết đơn hàng của người dùng",
+                "description": "Trả về chi tiết đơn hàng của người dùng.",
+                "operationId": "324c15f5afedf2582efe27dff8f25c5b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID của đơn hàng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chi tiết đơn hàng của người dùng",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "description": "ID đơn hàng",
+                                                "type": "integer"
+                                            },
+                                            "user_id": {
+                                                "description": "ID người dùng",
+                                                "type": "integer"
+                                            },
+                                            "total_price": {
+                                                "description": "Tổng giá trị đơn hàng",
+                                                "type": "string"
+                                            },
+                                            "status": {
+                                                "description": "Trạng thái đơn hàng",
+                                                "type": "string"
+                                            },
+                                            "created_at": {
+                                                "description": "Thời gian tạo đơn hàng",
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "updated_at": {
+                                                "description": "Thời gian cập nhật đơn hàng",
+                                                "type": "string",
+                                                "format": "date-time"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Chưa xác thực (token không hợp lệ hoặc thiếu)"
+                    },
+                    "404": {
+                        "description": "Không tìm thấy đơn hàng"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/cms/orders/create": {
             "post": {
                 "tags": [
-                    "CMS Order"
+                    "CMS Orders"
                 ],
                 "summary": "Admin tạo đơn hàng",
                 "description": "Tạo một đơn hàng với danh sách sản phẩm và số lượng.",
@@ -823,7 +1347,7 @@
         "/api/cms/orders/update/{id}": {
             "put": {
                 "tags": [
-                    "CMS Order"
+                    "CMS Orders"
                 ],
                 "summary": "Cập nhật thông tin đơn hàng",
                 "description": "Cập nhật thông tin đơn hàng dựa trên ID",
@@ -944,7 +1468,7 @@
         "/api/cms/orders/delete/{id}": {
             "delete": {
                 "tags": [
-                    "CMS Order"
+                    "CMS Orders"
                 ],
                 "summary": "Xóa đơn hàng",
                 "description": "Xóa đơn hàng khỏi hệ thống",
@@ -1047,7 +1571,7 @@
         "/api/cms/product/create": {
             "post": {
                 "tags": [
-                    "CMS Product"
+                    "CMS Products"
                 ],
                 "summary": "Create a new product",
                 "operationId": "9c87e3bb2628ebe79d902647fe9a6986",
@@ -1083,7 +1607,7 @@
         "/api/cms/product/update/{id}": {
             "put": {
                 "tags": [
-                    "CMS Product"
+                    "CMS Products"
                 ],
                 "summary": "Cập nhật sản phẩm",
                 "description": "Cập nhật thông tin sản phẩm dựa trên ID",
@@ -1163,7 +1687,7 @@
         "/api/cms/product/delete/{id}": {
             "delete": {
                 "tags": [
-                    "CMS Product"
+                    "CMS Products"
                 ],
                 "summary": "Xóa sản phẩm",
                 "description": "Xóa sản phẩm khỏi hệ thống",
@@ -1272,6 +1796,10 @@
     },
     "tags": [
         {
+            "name": "Cart",
+            "description": "Quản lý giỏ hàng của người dùng"
+        },
+        {
             "name": "Authentication",
             "description": "Authentication"
         },
@@ -1288,12 +1816,12 @@
             "description": "CMS Inventories"
         },
         {
-            "name": "CMS Order",
-            "description": "CMS Order"
+            "name": "CMS Orders",
+            "description": "CMS Orders"
         },
         {
-            "name": "CMS Product",
-            "description": "CMS Product"
+            "name": "CMS Products",
+            "description": "CMS Products"
         }
     ]
 }

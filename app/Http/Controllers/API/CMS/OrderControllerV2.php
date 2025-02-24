@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Http\Resources\OrderResource;
 
 class OrderControllerV2 extends Controller
 {
@@ -27,7 +28,7 @@ class OrderControllerV2 extends Controller
     /**
      * @OA\Get(
      *     path="/api/cms/orders/",
-     *     tags={"CMS Order"},
+     *     tags={"CMS Orders"},
      *     summary="Get list of orders",
      *     security={{"bearerAuth":{}}},
      *     @OA\Response(
@@ -43,13 +44,60 @@ class OrderControllerV2 extends Controller
         return response()->json($this->orderService->getAllOrders(), 200);
     }
     /**
+     * @OA\Get(
+     *     path="/api/cms/orders/show/{id}",
+     *     summary="Lấy chi tiết đơn hàng của người dùng",
+     *     description="Trả về chi tiết đơn hàng của người dùng.",
+     *     tags={"CMS Orders"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID của đơn hàng",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Chi tiết đơn hàng của người dùng",
+     *         @OA\JsonContent(
+     *             type="array",
+     *             @OA\Items(
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", description="ID đơn hàng"),
+     *                 @OA\Property(property="user_id", type="integer", description="ID người dùng"),
+     *                 @OA\Property(property="total_price", type="string", description="Tổng giá trị đơn hàng"),
+     *                 @OA\Property(property="status", type="string", description="Trạng thái đơn hàng"),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", description="Thời gian tạo đơn hàng"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", description="Thời gian cập nhật đơn hàng")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Chưa xác thực (token không hợp lệ hoặc thiếu)",
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Không tìm thấy đơn hàng",
+     *     )
+     * )
+     */
+    public function getOrderDetails($orderId)
+    {
+        $orderDetails = $this->orderService->getOrderDetails($orderId);
+
+        return response()->json(['message' => 'Chi tiết sản phẩm trong đơn hàng của bạn', 'details' => OrderResource::collection($orderDetails)], 200);
+        // return response()->json(['order' => $orderDetails]);
+    }
+    /**
      * Tạo đơn hàng mới.
      *
      * @OA\Post(
      *     path="/api/cms/orders/create",
      *     summary="Admin tạo đơn hàng",
      *     description="Tạo một đơn hàng với danh sách sản phẩm và số lượng.",
-     *     tags={"CMS Order"},
+     *     tags={"CMS Orders"},
      *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
@@ -140,7 +188,7 @@ class OrderControllerV2 extends Controller
      *     path="/api/cms/orders/update/{id}",
      *     summary="Cập nhật thông tin đơn hàng",
      *     security={{"bearerAuth":{}}},
-     *     tags={"CMS Order"},
+     *     tags={"CMS Orders"},
      *     description="Cập nhật thông tin đơn hàng dựa trên ID",
      *     @OA\Parameter(
      *         name="id",
@@ -221,7 +269,7 @@ class OrderControllerV2 extends Controller
     /**
      * @OA\Delete(
      *     path="/api/cms/orders/delete/{id}",
-     *     tags={"CMS Order"},
+     *     tags={"CMS Orders"},
      *     summary="Xóa đơn hàng",
      *     security={{"bearerAuth":{}}},
      *     description="Xóa đơn hàng khỏi hệ thống",

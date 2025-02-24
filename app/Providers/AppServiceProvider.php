@@ -4,18 +4,6 @@ namespace App\Providers;
 
 
 use Illuminate\Support\ServiceProvider;
-use App\Repositories\BaseRepositoryInterface;
-use App\Repositories\BaseRepository;
-use App\Repositories\Category\CategoryInterface;
-use App\Repositories\Category\CategoryRepository;
-use App\Repositories\Product\ProductInterface;
-use App\Repositories\Product\ProductRepository;
-use App\Repositories\Order\OrderRepository;
-use App\Repositories\Order\OrderInterface;
-use App\Repositories\OrderItem\OrderItemInterface;
-use App\Repositories\OrderItem\OrderItemRepository;
-use App\Repositories\Inventory\InventoryInterface;
-use App\Repositories\Inventory\InventoryRepository;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -26,12 +14,19 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         //
-        $this->app->bind(BaseRepositoryInterface::class, BaseRepository::class);
-        $this->app->bind(ProductInterface::class, ProductRepository::class);
-        $this->app->bind(OrderInterface::class, OrderRepository::class);
-        $this->app->bind(OrderItemInterface::class, OrderItemRepository::class);
-        $this->app->bind(CategoryInterface::class, CategoryRepository::class);
-        $this->app->bind(InventoryInterface::class, InventoryRepository::class);
+        $repositories = [
+            \App\Repositories\BaseRepositoryInterface::class => \App\Repositories\BaseRepository::class,
+            \App\Repositories\Product\ProductInterface::class => \App\Repositories\Product\ProductRepository::class,
+            \App\Repositories\Order\OrderInterface::class => \App\Repositories\Order\OrderRepository::class,
+            \App\Repositories\OrderItem\OrderItemInterface::class => \App\Repositories\OrderItem\OrderItemRepository::class,
+            \App\Repositories\Category\CategoryInterface::class => \App\Repositories\Category\CategoryRepository::class,
+            \App\Repositories\Inventory\InventoryInterface::class => \App\Repositories\Inventory\InventoryRepository::class,
+            \App\Repositories\Cart\CartInterface::class => \App\Repositories\Cart\CartRepository::class,
+        ];
+
+        foreach ($repositories as $interface => $repository) {
+            $this->app->bind($interface, $repository);
+        }
     }
 
     /**

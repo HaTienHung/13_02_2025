@@ -46,4 +46,22 @@ abstract class BaseRepository implements BaseRepositoryInterface
     }
     return false;
   }
+  public function findOneBy(array $conditions)
+  {
+    return $this->model->where($conditions)->first();
+  }
+  public function findBy(array $conditions)
+  {
+    $query = $this->model->query();
+
+    foreach ($conditions as $key => $value) {
+      if (is_array($value)) {
+        $query->whereIn($key, $value);
+      } else {
+        $query->where($key, $value);
+      }
+    }
+
+    return $query->get();
+  }
 }

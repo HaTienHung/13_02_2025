@@ -6,7 +6,6 @@ use App\Services\Order\OrderService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class OrderController extends Controller
 {
@@ -139,12 +138,58 @@ class OrderController extends Controller
       // Trả về danh sách đơn hàng của người dùng
       return response()->json([
         'message' => 'Đơn hàng của bạn',
-        'orders' => OrderResource::collection($orders)
+        'orders' => $orders
       ]);
     } catch (\Exception $e) {
       // Xử lý khi có lỗi
       return response()->json(['message' => $e->getMessage()], 500);
     }
+  }
+  /**
+   * @OA\Get(
+   *     path="/api/app/orders/show/{id}",
+   *     summary="Lấy chi tiết đơn hàng của người dùng",
+   *     description="Trả về chi tiết đơn hàng của người dùng.",
+   *     tags={"APP"},
+   *     security={{"bearerAuth":{}}},
+   *     @OA\Parameter(
+   *         name="id",
+   *         in="path",
+   *         description="ID của đơn hàng",
+   *         required=true,
+   *         @OA\Schema(type="integer")
+   *     ),
+   *     @OA\Response(
+   *         response=200,
+   *         description="Chi tiết đơn hàng của người dùng",
+   *         @OA\JsonContent(
+   *             type="array",
+   *             @OA\Items(
+   *                 type="object",
+   *                 @OA\Property(property="id", type="integer", description="ID đơn hàng"),
+   *                 @OA\Property(property="user_id", type="integer", description="ID người dùng"),
+   *                 @OA\Property(property="total_price", type="string", description="Tổng giá trị đơn hàng"),
+   *                 @OA\Property(property="status", type="string", description="Trạng thái đơn hàng"),
+   *                 @OA\Property(property="created_at", type="string", format="date-time", description="Thời gian tạo đơn hàng"),
+   *                 @OA\Property(property="updated_at", type="string", format="date-time", description="Thời gian cập nhật đơn hàng")
+   *             )
+   *         )
+   *     ),
+   *     @OA\Response(
+   *         response=401,
+   *         description="Chưa xác thực (token không hợp lệ hoặc thiếu)",
+   *     ),
+   *     @OA\Response(
+   *         response=404,
+   *         description="Không tìm thấy đơn hàng",
+   *     )
+   * )
+   */
+  public function getOrderDetails($orderId)
+  {
+    $orderDetails = $this->orderService->getOrderDetails($orderId);
+
+    return response()->json(['message' => 'Chi tiết sản phẩm trong đơn hàng của bạn', 'details' => OrderResource::collection($orderDetails)], 200);
   }
   /**
    * @OA\Put(

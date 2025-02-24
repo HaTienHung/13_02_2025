@@ -44,6 +44,18 @@ class OrderService
     return $this->orderRepository->all();
   }
 
+  public function getOrderDetails($orderId)
+  {
+    $order = $this->orderRepository->find($orderId);
+
+    // Kiểm tra quyền truy cập
+    if ($order->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
+      throw new \Exception("Bạn không có quyền xem đơn hàng này.", 403);
+    }
+
+    return $this->orderRepository->getOrderDetails($order->id);
+  }
+
   public function getOrdersByUserID($userId)
   {
     // Gọi repository để lấy đơn hàng của người dùng
@@ -207,6 +219,7 @@ class OrderService
       throw new \Exception("Không tìm thấy đơn hàng.", 404);
     }
   }
+
   public function deleteOrder($orderId)
   {
     DB::beginTransaction();

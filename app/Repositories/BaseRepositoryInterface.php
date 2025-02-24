@@ -9,4 +9,6 @@ interface BaseRepositoryInterface
   public function create(array $data);
   public function update($id, array $data);
   public function delete($id);
+  public function findBy(array $conditions);
+  public function findOneBy(array $conditions);
 }

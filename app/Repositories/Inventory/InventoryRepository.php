@@ -11,22 +11,6 @@ class InventoryRepository extends BaseRepository implements InventoryInterface
   {
     parent::__construct($inventory);
   }
-  public function addStock($productId, $quantity)
-  {
-    return InventoryTransaction::create([
-      'product_id' => $productId,
-      'type' => 'import',
-      'quantity' => $quantity
-    ]);
-  }
-  public function reduceStock($productId, $quantity)
-  {
-    return InventoryTransaction::create([
-      'product_id' => $productId,
-      'type' => 'export',
-      'quantity' => $quantity,
-    ]);
-  }
   public function getImportProduct($productId)
   {
     return $this->model->where('product_id', $productId)->where('type', 'import')->sum('quantity');
@@ -35,16 +19,8 @@ class InventoryRepository extends BaseRepository implements InventoryInterface
   {
     return $this->model->where('product_id', $productId)->where('type', 'export')->sum('quantity');
   }
-  public function getStock($productId)
+  public function showInventoryRecords($productId)
   {
-    $imported = InventoryTransaction::where('product_id', $productId)
-      ->where('type', 'import')
-      ->sum('quantity');
-
-    $exported = InventoryTransaction::where('product_id', $productId)
-      ->where('type', 'export')
-      ->sum('quantity');
-
-    return $imported - $exported;
+    return $this->model->where('product_id', $productId)->get();
   }
 }

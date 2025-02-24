@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 //5|dRp0ydTptgViSlXoh15Fg8sRI3LXw52GrdJZ70WC7cba76ab user
 //6|7zq1YAeqxbuZFwaqEy8MrireevoPHxxJh1PDJ00K61ffc6d7 admin
+//8|GHo19AMbXD9SezbrdZipuq7IDmODtOf4nuaeYm3Hf81a042d user05
 
 Route::get('/user', function (Request $request) {
     return $request->user();

@@ -63,4 +63,13 @@ class InventoryService
       ];
     });
   }
+  public function showInventoryRecords($productId)
+  {
+    // Kiểm tra sản phẩm có tồn tại không
+    $product = $this->productRepository->find($productId);
+    if (!$product) {
+      throw new \Exception("Sản phẩm không tồn tại.");
+    }
+    return $this->inventoryRepository->showInventoryRecords($productId);
+  }
 }

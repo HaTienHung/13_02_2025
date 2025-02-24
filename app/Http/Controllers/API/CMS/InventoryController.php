@@ -111,6 +111,34 @@ class InventoryController extends Controller
     return response()->json([
       'message' => 'Danh sách tồn kho của sản phẩm',
       'stockReport' => $stockReport
-    ]);
+    ], 200);
+  }
+  /**
+   * @OA\Get(
+   *     path="/api/cms/inventories/show/{id}/transactions",
+   *     tags={"CMS Inventories"},
+   *     summary="Get Inventory Records of a Product",
+   *     security={{"bearerAuth":{}}},
+   *     @OA\Parameter(
+   *         name="id",
+   *         in="path",
+   *         description="ID của sản phẩm",
+   *         required=true,
+   *         @OA\Schema(type="integer")
+   *     ),
+   *     @OA\Response(
+   *         response=200,
+   *         description="List of inventory transactions for the product",
+   *         @OA\JsonContent(ref="#/components/schemas/Inventory")
+   *     )
+   * )
+   */
+  public function showInventoryRecords($productId)
+  {
+    $inventoryRecords = $this->inventoryService->showInventoryRecords($productId);
+    return response()->json([
+      'message' => 'Danh sách các giao dịch của sản phẩm',
+      'stockReport' => $inventoryRecords
+    ], 200);
   }
 }
