@@ -9,6 +9,7 @@ use App\Models\User;
 use DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\OrderResource;
+use Symfony\Component\HttpFoundation\Response;
 
 class OrderControllerV2 extends Controller
 {
@@ -41,7 +42,7 @@ class OrderControllerV2 extends Controller
 
     public function index()
     {
-        return response()->json($this->orderService->getAllOrders(), 200);
+        return response()->json($this->orderService->getAllOrders(), Response::HTTP_OK);
     }
     /**
      * @OA\Get(
@@ -85,10 +86,18 @@ class OrderControllerV2 extends Controller
      */
     public function getOrderDetails($orderId)
     {
-        $orderDetails = $this->orderService->getOrderDetails($orderId);
+        try {
+            $orderDetails = $this->orderService->getOrderDetails($orderId);
 
-        return response()->json(['message' => 'Chi tiết sản phẩm trong đơn hàng của bạn', 'details' => OrderResource::collection($orderDetails)], 200);
-        // return response()->json(['order' => $orderDetails]);
+            return response()->json([
+                'message' => 'Chi tiết sản phẩm trong đơn hàng của bạn',
+                'details' => OrderResource::collection($orderDetails)
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Không tìm thấy đơn hàng.'
+            ], Response::HTTP_NOT_FOUND);
+        }
     }
     /**
      * Tạo đơn hàng mới.
@@ -176,11 +185,11 @@ class OrderControllerV2 extends Controller
             return response()->json([
                 'message' => 'Admin tạo đơn hàng thành công!',
                 'order_id' => $order->id
-            ], 201);
+            ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
             // Nếu có lỗi, rollback lại tất cả thay đổi (bao gồm xóa user)
             DB::rollBack();
-            return response()->json(['message' => $e->getMessage()], 400);
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
     }
     /**
@@ -261,9 +270,9 @@ class OrderControllerV2 extends Controller
             return response()->json([
                 'message' => 'Đơn hàng đã được cập nhật thành công',
                 'order' => $order
-            ]);
+            ], REsponse::HTTP_OK);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
+            return response()->json(['message' => 'Không tìm thấy đơn hàng'], Response::HTTP_BAD_REQUEST);
         }
     }
     /**
@@ -297,7 +306,7 @@ class OrderControllerV2 extends Controller
 
             return response()->json(['message' => 'Đơn hàng đã được xoá thành công']);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
+            return response()->json(['message' => 'Không tìm thấy đơn hàng'], Response::HTTP_NOT_FOUND);
         }
     }
 }

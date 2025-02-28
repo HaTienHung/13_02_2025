@@ -17,6 +17,11 @@ use Symfony\Component\HttpFoundation\Response;
 class CartController extends Controller
 {
   protected $cartService;
+  /**
+   * Khởi tạo CartController.
+   * 
+   * @param CartService $cartService
+   */
 
   public function __construct(CartService $cartService)
   {
@@ -65,31 +70,16 @@ class CartController extends Controller
 
   public function addToCart(Request $request)
   {
-    try {
-      $request->validate([
-        'product_id' => 'required|exists:products,id',
-        'quantity' => 'required|integer|min:1'
-      ]);
+    $request->validate([
+      'product_id' => 'required|exists:products,id',
+      'quantity' => 'required|integer|min:1'
+    ]);
 
-      $this->cartService->addItemToCart(auth()->id(), $request->product_id, $request->quantity);
+    $this->cartService->addItemToCart(auth()->id(), $request->product_id, $request->quantity);
 
-      return response()->json(['message' => 'Sản phẩm đã được thêm vào giỏ hàng.'], Response::HTTP_OK);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-      return response()->json([
-        'message' => 'Dữ liệu không hợp lệ.',
-        'errors' => $e->errors()
-      ], Response::HTTP_UNPROCESSABLE_ENTITY);
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-      return response()->json([
-        'message' => 'Sản phẩm không tồn tại.',
-      ], Response::HTTP_NOT_FOUND);
-    } catch (\Throwable $e) {
-      return response()->json([
-        'message' => 'Đã xảy ra lỗi, vui lòng thử lại.',
-        'error' => $e->getMessage()
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
+    return response()->json(['message' => 'Sản phẩm đã được thêm vào giỏ hàng.'], Response::HTTP_OK);
   }
+
   /**
    * Cập nhật số lượng sản phẩm trong giỏ hàng
    * 
@@ -268,7 +258,10 @@ class CartController extends Controller
   {
     $request->validate([
       'product_ids' => 'required|array',
-      'product_ids.*' => 'exists:products,id'
+      'product_ids.*' => [
+        'integer',
+        Rule::exists('cart_items', 'product_id')->where('user_id', auth()->id())
+      ]
     ]);
 
     $order = $this->cartService->checkout(auth()->id(), $request->product_ids);

@@ -20,4 +20,8 @@ class CategoryRepository extends BaseRepository implements CategoryInterface
     //Lấy tất cả các sản phẩm của danh mục !!!
   }
   // Có thể thêm các phương thức đặc biệt riêng cho Product nếu cần
+  public function findByName($name)
+  {
+    return $this->model->where('name', $name)->first();
+  }
 }

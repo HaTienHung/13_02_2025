@@ -21,5 +21,9 @@ class CategorySeeder extends Seeder
         Category::create([
             'name' => 'Drinks',
         ]);
+
+        Category::create([
+            'name' => 'Snacks',
+        ]);
     }
 }

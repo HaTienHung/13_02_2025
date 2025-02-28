@@ -14,18 +14,18 @@ class InventorySeeder extends Seeder
     public function run()
     {
         InventoryTransaction::create([
-            'product_id' => '1',
-            'stock' => '50',
+            'product_id' => 3,
+            'quantity' => '50',
             'type' => 'import'
         ]);
         InventoryTransaction::create([
-            'product_id' => '2',
-            'stock' => '50',
+            'product_id' => 4,
+            'quantity' => '50',
             'type' => 'import'
         ]);
         InventoryTransaction::create([
-            'product_id' => '3',
-            'stock' => '50',
+            'product_id' => 5,
+            'quantity' => '50',
             'type' => 'import'
         ]);
     }

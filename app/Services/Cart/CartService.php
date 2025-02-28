@@ -5,6 +5,8 @@ namespace App\Services\Cart;
 use App\Repositories\Cart\CartInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Services\Order\OrderService;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class CartService
@@ -48,7 +50,7 @@ class CartService
       'product_id' => $productId
     ]);
     if (!$cartItem) {
-      throw new ModelNotFoundException("Sản phẩm không có trong giỏ hàng.");
+      throw new ModelNotFoundException("Sản phẩm không có trong giỏ hàng.", Response::HTTP_NOT_FOUND);
     }
 
     return $this->cartRepository->updateCartItem($cartItem, $quantity);
@@ -65,7 +67,9 @@ class CartService
     ]);
 
     if ($cartItems->isEmpty()) {
-      throw new ModelNotFoundException("Xoá thất bại: Không có sản phẩm nào trong giỏ hàng.");
+      throw new HttpResponseException(response()->json([
+        'message' => 'Xoá thất bại: Không có sản phẩm nào trong giỏ hàng.',
+      ], Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 
     // Xóa các sản phẩm có trong danh sách
@@ -82,14 +86,14 @@ class CartService
     $cartItems = $this->cartRepository->getCartItems($userId);
 
     if ($cartItems->isEmpty()) {
-      throw new \Exception("Giỏ hàng trống.");
+      throw new \Exception("Giỏ hàng trống.", Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     // Lọc ra các sản phẩm được đặt hàng
     $itemsToOrder = $cartItems->whereIn('product_id', $productIds);
 
     if ($itemsToOrder->isEmpty()) {
-      throw new \Exception("Không có sản phẩm hợp lệ để đặt hàng.");
+      throw new \Exception("Không có sản phẩm hợp lệ để đặt hàng.", Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     $order = $this->orderService->createOrder($userId, $itemsToOrder);

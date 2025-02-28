@@ -4,6 +4,8 @@ namespace App\Services\Product;
 
 use App\Repositories\Product\ProductInterface;
 use Exception;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProductService
 {
@@ -36,17 +38,6 @@ class ProductService
 
   public function deleteProduct($id)
   {
-    $product = $this->productRepository->find($id);
-
-    if (!$product) {
-      throw new Exception('Sản phẩm không tồn tại', 404);
-    }
-
-    // Thực hiện xóa Sản phẩm
-    if (!$this->productRepository->delete($id)) {
-      throw new Exception('Xóa Sản phẩm thất bại', 500);
-    }
-
-    return true;
+    return $this->productRepository->delete($id);
   }
 }

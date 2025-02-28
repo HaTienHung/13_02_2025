@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api\Cms;
 
 use App\Services\Inventory\InventoryService;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class InventoryController extends Controller
 {
@@ -51,7 +52,7 @@ class InventoryController extends Controller
 
     $inventoryTransaction = $this->inventoryService->addStock($request->product_id, $request->quantity);
 
-    return response()->json(['message' => 'Thêm hàng vào kho thành công', 'inventoryTransaction' => $inventoryTransaction], 201);
+    return response()->json(['message' => 'Thêm hàng vào kho thành công', 'inventoryTransaction' => $inventoryTransaction], Response::HTTP_CREATED);
   }
   /**
    * @OA\Get(
@@ -80,16 +81,11 @@ class InventoryController extends Controller
       return response()->json([
         'message' => 'Số lượng hiện tại của sản phẩm trong kho',
         'currentStock' => $currentStock
-      ], 200);
+      ], Response::HTTP_OK);
     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
       return response()->json([
-        'message' => 'Sản phẩm không tồn tại.'
-      ], 404);
-    } catch (\Exception $e) {
-      return response()->json([
-        'message' => 'Đã có lỗi xảy ra.',
-        'error' => $e->getMessage()
-      ], 500);
+        'message' => 'Không tìm thấy sản phẩm.'
+      ], Response::HTTP_NOT_FOUND);
     }
   }
   /**
@@ -111,7 +107,7 @@ class InventoryController extends Controller
     return response()->json([
       'message' => 'Danh sách tồn kho của sản phẩm',
       'stockReport' => $stockReport
-    ], 200);
+    ], Response::HTTP_OK);
   }
   /**
    * @OA\Get(
@@ -135,10 +131,17 @@ class InventoryController extends Controller
    */
   public function showInventoryRecords($productId)
   {
-    $inventoryRecords = $this->inventoryService->showInventoryRecords($productId);
-    return response()->json([
-      'message' => 'Danh sách các giao dịch của sản phẩm',
-      'stockReport' => $inventoryRecords
-    ], 200);
+    try {
+      $inventoryRecords = $this->inventoryService->showInventoryRecords($productId);
+
+      return response()->json([
+        'message' => 'Danh sách các giao dịch của sản phẩm',
+        'stockReport' => $inventoryRecords
+      ], Response::HTTP_OK);
+    } catch (ModelNotFoundException $e) {
+      return response()->json([
+        'message' => 'Không tìm thấy sản phẩm hoặc không có giao dịch nào.'
+      ], Response::HTTP_NOT_FOUND);
+    }
   }
 }

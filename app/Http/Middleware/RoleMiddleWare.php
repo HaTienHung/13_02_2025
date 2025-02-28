@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -18,9 +19,8 @@ class RoleMiddleWare
         $user = $request->user(); // Lấy user hiện tại
 
         if (!$user || $user->role !== $role) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            throw new AuthorizationException("Bạn không có quyền thực hiện hành động này.");
         }
-
         return $next($request);
     }
 }

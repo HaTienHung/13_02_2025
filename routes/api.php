@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
-//5|dRp0ydTptgViSlXoh15Fg8sRI3LXw52GrdJZ70WC7cba76ab user
-//6|7zq1YAeqxbuZFwaqEy8MrireevoPHxxJh1PDJ00K61ffc6d7 admin
-//8|GHo19AMbXD9SezbrdZipuq7IDmODtOf4nuaeYm3Hf81a042d user05
+//1|gLkOo8cl7vgB5xQpGVJhQ0VNrnQrMlsiWEvRsyMA93ca5f7f user01
+//2|wSeP9jaolbS6Mz7m41xikZv9g6tHjrJxlc3nzL45641d3d06 user02
+//3|RgHU8010356cko8Rho6mNxiLdZSRmlTaTKbT854Q873dad6c admin01
 
 Route::get('/user', function (Request $request) {
     return $request->user();

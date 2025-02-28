@@ -4,6 +4,7 @@ namespace App\Services\Inventory;
 
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Product\ProductRepository;
+use Symfony\Component\HttpFoundation\Response;
 
 use Exception;
 
@@ -21,12 +22,6 @@ class InventoryService
   }
   public function addStock($productId, $quantity)
   {
-    // Kiểm tra sản phẩm có tồn tại không
-    $product = $this->productRepository->find($productId);
-    if (!$product) {
-      throw new \Exception("Sản phẩm không tồn tại.");
-    }
-
     // Ghi nhận giao dịch nhập kho
     return $this->inventoryRepository->create([
       'product_id' => $productId,
@@ -36,7 +31,7 @@ class InventoryService
   }
   public function reduceStock($productId, $quantity)
   {
-    $this->inventoryRepository->create([
+    return $this->inventoryRepository->create([
       'product_id' => $productId,
       'quantity' => $quantity,
       'type' => 'export', // Loại giao dịch: xuat kho
@@ -45,10 +40,7 @@ class InventoryService
   public function getStock($productId)
   {
     // Kiểm tra sản phẩm có tồn tại không
-    $product = $this->productRepository->find($productId);
-    if (!$product) {
-      throw new \Exception("Sản phẩm không tồn tại.");
-    }
+    $this->productRepository->find($productId);
     $imported = $this->inventoryRepository->getImportProduct($productId);
     $exported = $this->inventoryRepository->getEXportProduct($productId);
     return $imported - $exported;
@@ -66,10 +58,8 @@ class InventoryService
   public function showInventoryRecords($productId)
   {
     // Kiểm tra sản phẩm có tồn tại không
-    $product = $this->productRepository->find($productId);
-    if (!$product) {
-      throw new \Exception("Sản phẩm không tồn tại.");
-    }
+    $this->productRepository->find($productId);
+
     return $this->inventoryRepository->showInventoryRecords($productId);
   }
 }

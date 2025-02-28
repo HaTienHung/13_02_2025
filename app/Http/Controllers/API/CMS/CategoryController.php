@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\Cms;
 
 use App\Services\Category\CategoryService;
 use App\Http\Controllers\Controller;
-use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CategoryController extends Controller
 {
@@ -37,7 +37,7 @@ class CategoryController extends Controller
   public function index()
   {
     $categories = $this->categoryService->getAllCategories();
-    return response()->json(['message' => 'Danh sách các danh mục', 'categories' => $categories], 200);
+    return response()->json(['message' => 'Danh sách các danh mục', 'categories' => $categories], Response::HTTP_OK);
   }
   /**
    * @OA\Get(
@@ -65,11 +65,13 @@ class CategoryController extends Controller
       return response()->json([
         'message' => 'Danh sách các sản phẩm của danh mục',
         'products' => $products
-      ], 200);
+      ], Response::HTTP_OK);
+    } catch (ModelNotFoundException $e) {
+      return response()->json(['message' => "Danh mục không tồn tại"], Response::HTTP_NOT_FOUND);
     } catch (\Exception $e) {
       return response()->json([
-        'error' => $e->getMessage()
-      ], 404); // Trả về lỗi 404 nếu danh mục không có sản phẩm
+        'message' => $e->getMessage()
+      ], Response::HTTP_UNPROCESSABLE_ENTITY); // Trả về lỗi 404 nếu danh mục không có sản phẩm
     }
   }
   /**
@@ -95,8 +97,20 @@ class CategoryController extends Controller
       'name' => 'required|string|max:255',
     ]);
 
-    return response()->json(['messsage' => 'Danh mục đã được thêm thành công', 'category' => $this->categoryService->createCategory($request->all())], 201);
+    try {
+      $category = $this->categoryService->createCategory($request->all());
+
+      return response()->json([
+        'message' => 'Danh mục đã được thêm thành công',
+        'category' => $category
+      ], Response::HTTP_CREATED);
+    } catch (\Exception $e) {
+      return response()->json([
+        'message' => $e->getMessage()
+      ], Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
   }
+
   /**
    * @OA\Put(
    *     path="/api/cms/categories/update/{id}",
@@ -140,11 +154,11 @@ class CategoryController extends Controller
       return response()->json([
         'message' => 'Danh mục đã được cập nhật thành công',
         'category' => $category
-      ]);
+      ], Response::HTTP_OK);
     } catch (ModelNotFoundException $e) {
-      return response()->json(['message' => 'Danh mục không tồn tại'], 404);
+      return response()->json(['message' => 'Danh mục không tồn tại'], Response::HTTP_NOT_FOUND);
     } catch (\Exception $e) {
-      return response()->json(['message' => 'Đã xảy ra lỗi, vui lòng thử lại!'], 500);
+      return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
     }
   }
   /**

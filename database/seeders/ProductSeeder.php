@@ -15,27 +15,21 @@ class ProductSeeder extends Seeder
     {
         Product::create([
             'name' => 'Grape',
-            'description' => '',
-            'price' => 120,
-            'category_id' => '1',
-        ]);
-        Product::create([
-            'name' => 'Watermelon',
-            'description' => '',
-            'price' => 50,
-            'category_id' => '1',
+            'description' => 'Some thing aboud Grape',
+            'price' => 150,
+            'category_id' => 1,
         ]);
         Product::create([
             'name' => 'CocaCola',
-            'description' => '',
-            'price' => 25,
-            'category_id' => '2',
+            'description' => 'Some thing about CocaCola',
+            'price' => 20,
+            'category_id' => 2,
         ]);
         Product::create([
-            'name' => 'Fanta',
-            'description' => '',
-            'price' => 25,
-            'category_id' => '2',
+            'name' => 'Ostar',
+            'description' => 'Some thing about Ostar',
+            'price' => 10,
+            'category_id' => 3,
         ]);
     }
 }

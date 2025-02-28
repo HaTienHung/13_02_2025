@@ -2,12 +2,14 @@
 
 namespace App\Services\Order;
 
+use App\Models\Order;
 use App\Repositories\Order\OrderInterface;
 use App\Repositories\Product\ProductInterface;
 use App\Repositories\OrderItem\OrderItemInterface;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
 
 class OrderService
 {
@@ -50,7 +52,7 @@ class OrderService
 
     // Kiểm tra quyền truy cập
     if ($order->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
-      throw new \Exception("Bạn không có quyền xem đơn hàng này.", 403);
+      throw new \Exception("Bạn không có quyền xem đơn hàng này.", Response::HTTP_FORBIDDEN);
     }
 
     return $this->orderRepository->getOrderDetails($order->id);
@@ -78,13 +80,9 @@ class OrderService
       foreach ($items as $item) {
         $product = $this->productRepository->find($item['product_id']);
 
-        if (!$product) {
-          throw new \Exception("Sản phẩm không tồn tại.");
-        }
-
         $stock = $this->inventoryService->getStock($product->id);
         if ($stock < $item['quantity']) {
-          throw new \Exception("Sản phẩm {$product->name} không đủ hàng trong kho.");
+          throw new \Exception("Sản phẩm {$product->name} không đủ hàng trong kho.", Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         // Giảm số lượng tồn kho
@@ -122,12 +120,12 @@ class OrderService
 
       // Kiểm tra quyền: Chỉ user sở hữu đơn hàng mới có quyền cập nhật
       if ($order->user_id !== $userId && !auth()->user()->isAdmin()) {
-        throw new \Exception("Bạn không có quyền sửa đơn hàng này.", 403);
+        throw new \Exception("Bạn không có quyền sửa đơn hàng này.", Response::HTTP_FORBIDDEN);
       }
 
       // Kiểm tra trạng thái đơn hàng (chỉ cho phép sửa khi đơn hàng đang 'pending')
       if ($order->status !== 'pending' && !auth()->user()->isAdmin()) {
-        throw new \Exception("Chỉ có thể sửa đơn hàng khi đang ở trạng thái 'pending'.", 403);
+        throw new \Exception("Chỉ có thể sửa đơn hàng khi đang ở trạng thái 'pending'.", Response::HTTP_FORBIDDEN);
       }
 
       $totalPrice = 0;
@@ -141,10 +139,6 @@ class OrderService
 
       foreach ($items as $item) {
         $product = $this->productRepository->find($item['product_id']);
-
-        if (!$product) {
-          throw new \Exception("Sản phẩm không tồn tại.");
-        }
 
         $newQuantity = $item['quantity'];
         $productId = $product->id;
@@ -163,7 +157,7 @@ class OrderService
             // Nếu số lượng tăng, kiểm tra kho
             $stock = $this->inventoryService->getStock($productId);
             if ($stock < $difference) {
-              throw new \Exception("Sản phẩm {$product->name} không đủ hàng trong kho.");
+              throw new \Exception("Sản phẩm {$product->name} không đủ hàng trong kho.", Response::HTTP_UNPROCESSABLE_ENTITY);
             }
             $this->inventoryService->reduceStock($productId, $difference);
           } elseif ($difference < 0) {
@@ -180,7 +174,7 @@ class OrderService
           // Nếu sản phẩm chưa có, thêm mới vào order_items
           $stock = $this->inventoryService->getStock($productId);
           if ($stock < $newQuantity) {
-            throw new \Exception("Sản phẩm {$product->name} không đủ hàng trong kho.");
+            throw new \Exception("Sản phẩm {$product->name} không đủ hàng trong kho.", Response::HTTP_UNPROCESSABLE_ENTITY);
           }
           $this->inventoryService->reduceStock($productId, $newQuantity);
 
@@ -216,7 +210,7 @@ class OrderService
       return $order;
     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
       DB::rollBack();
-      throw new \Exception("Không tìm thấy đơn hàng.", 404);
+      throw new \Exception("Không tìm thấy đơn hàng.", Response::HTTP_NOT_FOUND);
     }
   }
 
@@ -229,7 +223,7 @@ class OrderService
 
       // Kiểm tra quyền: chỉ user sở hữu hoặc admin mới có quyền xoá
       if ($order->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
-        throw new \Exception("Bạn không có quyền xoá đơn hàng này.", 403);
+        throw new \Exception("Bạn không có quyền xoá đơn hàng này.", Response::HTTP_FORBIDDEN);
       }
 
       // Lấy danh sách sản phẩm trong đơn hàng
@@ -250,7 +244,7 @@ class OrderService
       return true;
     } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
       DB::rollBack();
-      throw new \Exception("Không tìm thấy đơn hàng.", 404);
+      throw new \Exception("Không tìm thấy đơn hàng.", Response::HTTP_NOT_FOUND);
     }
   }
 }

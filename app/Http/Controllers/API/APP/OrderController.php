@@ -6,6 +6,9 @@ use App\Services\Order\OrderService;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Symfony\Component\HttpFoundation\Response;
 
 class OrderController extends Controller
 {
@@ -13,7 +16,7 @@ class OrderController extends Controller
 
   /**
    * Khởi tạo OrderController.
-   * 
+   *
    * @param OrderService $orderService
    */
 
@@ -63,8 +66,6 @@ class OrderController extends Controller
    *     ),
    * )
    *
-   * @param Request $request
-   * @return JsonResponse
    */
 
   public function store(Request $request) //Phai fix lai
@@ -85,7 +86,7 @@ class OrderController extends Controller
         'order_id' => $order->id
       ], 201);
     } catch (\Exception $e) {
-      return response()->json(['message' => $e->getMessage()], 400);
+      return response()->json(['message' => $e->getMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
     }
   }
   /**
@@ -132,7 +133,7 @@ class OrderController extends Controller
 
       // Kiểm tra nếu không có đơn hàng
       if ($orders->isEmpty()) {
-        return response()->json(['message' => 'Đơn hàng chưa có sản phẩm'], 404);
+        return response()->json(['message' => 'Đơn hàng chưa có sản phẩm'], Response::HTTP_BAD_REQUEST);
       }
 
       // Trả về danh sách đơn hàng của người dùng
@@ -142,7 +143,7 @@ class OrderController extends Controller
       ]);
     } catch (\Exception $e) {
       // Xử lý khi có lỗi
-      return response()->json(['message' => $e->getMessage()], 500);
+      return response()->json(['message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
   /**
@@ -187,9 +188,18 @@ class OrderController extends Controller
    */
   public function getOrderDetails($orderId)
   {
-    $orderDetails = $this->orderService->getOrderDetails($orderId);
+    try {
+      $orderDetails = $this->orderService->getOrderDetails($orderId);
 
-    return response()->json(['message' => 'Chi tiết sản phẩm trong đơn hàng của bạn', 'details' => OrderResource::collection($orderDetails)], 200);
+      return response()->json([
+        'message' => 'Chi tiết sản phẩm trong đơn hàng của bạn',
+        'details' => OrderResource::collection($orderDetails),
+      ], Response::HTTP_OK);
+    } catch (ModelNotFoundException $e) {
+      throw new HttpResponseException(response()->json([
+        'message' => 'Không tìm thấy đơn hàng.',
+      ], Response::HTTP_NOT_FOUND));
+    }
   }
   /**
    * @OA\Put(
@@ -256,14 +266,10 @@ class OrderController extends Controller
     // Truyền userId (auth()->id()) và items từ request vào phương thức updateOrder
     $order = $this->orderService->updateOrder(auth()->id(), $orderId, $request->items);
 
-    if (!$order) {
-      return response()->json(['message' => 'Không tìm thấy đơn hàng'], 404);
-    }
-
     return response()->json([
       'message' => 'Đơn hàng đã được cập nhật thành công',
       'order' => $order
-    ]);
+    ], Response::HTTP_OK);
   }
   /**
    * @OA\Delete(
@@ -291,10 +297,8 @@ class OrderController extends Controller
    */
   public function destroy($orderId)
   {
-    $order = $this->orderService->deleteOrder($orderId);
-    if (!$order) {
-      return response()->json(['message' => "Không tìm thấy đơn hàng"], 404);
-    }
-    return response()->json(['message' => 'Đơn hàng đã được xoá thành công']);
+    $this->orderService->deleteOrder($orderId);
+
+    return response()->json(['message' => 'Đơn hàng đã được xoá thành công'], Response::HTTP_OK);
   }
 }

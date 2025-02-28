@@ -6,6 +6,7 @@ use App\Services\Product\ProductService;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @OA\Info(
@@ -47,7 +48,7 @@ class ProductController extends Controller
    */
   public function index()
   {
-    return response()->json($this->productService->getAllProducts(), 200);
+    return response()->json($this->productService->getAllProducts(), Response::HTTP_OK);
   }
   /**
    * @OA\Get(
@@ -68,20 +69,22 @@ class ProductController extends Controller
    *     )
    * )
    */
+
   public function show($id)
   {
     try {
       $product = $this->productService->getProductById($id);
-
       return response()->json([
+        'message' => 'Thông tin sản phẩm',
         'product' => $product,
-      ], 200);
+      ], Response::HTTP_OK);
     } catch (ModelNotFoundException $e) {
       return response()->json([
-        'message' => 'Không tìm thấy dữ liệu phù hợp.',
-      ], 404);
+        'message' => 'Không tìm thấy sản phẩm.',
+      ], Response::HTTP_NOT_FOUND);
     }
   }
+
   /**
    * @OA\Post(
    *     path="/api/cms/product/create",
@@ -104,10 +107,10 @@ class ProductController extends Controller
     $request->validate([
       'name' => 'required|string|max:255',
       'price' => 'required|numeric|min:0',
-      'category_id' => 'required|integer|min:0'
+      'category_id' => 'required|integer|min:0|exists:categories,id'
     ]);
 
-    return response()->json(['messsage' => 'Sản phẩm đã được thêm thành công', 'product' => $this->productService->createProduct($request->all())], 201);
+    return response()->json(['messsage' => 'Sản phẩm đã được thêm thành công', 'product' => $this->productService->createProduct($request->all())], Response::HTTP_CREATED);
   }
   /**
    * @OA\Put(
@@ -148,20 +151,21 @@ class ProductController extends Controller
     $request->validate([
       'name' => 'required|string',
       'price' => 'required|numeric',
-      'category_id' => 'required|integer'
+      'category_id' => 'required|integer|exists:categories,id'
     ]);
 
-    $product = $this->productService->updateProduct($id, $request->all());
+    try {
+      $product = $this->productService->updateProduct($id, $request->all());
 
-    if (!$product) {
-      return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
+      return response()->json([
+        'message' => 'Sản phẩm đã được cập nhật thành công',
+        'product' => $product
+      ], Response::HTTP_OK);
+    } catch (ModelNotFoundException $e) {
+      return response()->json(['message' => 'Không tìm thấy sản phẩm'], Response::HTTP_NOT_FOUND);
     }
-
-    return response()->json([
-      'message' => 'Sản phẩm đã được cập nhật thành công',
-      'product' => $product
-    ]);
   }
+
   /**
    * @OA\Delete(
    *     path="/api/cms/product/delete/{id}",
@@ -186,13 +190,13 @@ class ProductController extends Controller
    *     @OA\Response(response=404, description="Không tìm thấy sản phẩm")
    * )
    */
-  public function destroy(Request $request, $id)
+  public function destroy($id)
   {
     try {
       $this->productService->deleteProduct($id);
-      return response()->json(['message' => 'Sản phẩm đã được xóa thành công'], 200);
+      return response()->json(['message' => 'Sản phẩm đã được xóa thành công'], Response::HTTP_OK);
     } catch (ModelNotFoundException $e) {
-      return response()->json(['message' => 'Sản phẩm không tồn tại'], 404);
+      return response()->json(['message' => 'Sản phẩm không tồn tại'], Response::HTTP_NOT_FOUND);
     }
   }
 }
