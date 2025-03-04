@@ -7,7 +7,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class RoleMiddleware
+class RoleMiddleWare
 {
     /**
      * Handle an incoming request.
