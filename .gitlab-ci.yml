@@ -1,0 +1,26 @@
+image: php:8.2
+
+services:
+  - mysql:latest
+
+variables:
+  DB_CONNECTION: mysql
+  DB_HOST: mysql
+  DB_PORT: 3306
+  DB_DATABASE: test_db
+  DB_USERNAME: root
+  DB_PASSWORD: secret
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - apt-get update && apt-get install -y unzip git curl libzip-dev
+    - docker-php-ext-install pdo pdo_mysql
+    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - composer install
+    - php artisan key:generate
+    - php artisan migrate --force
+    - php artisan test
