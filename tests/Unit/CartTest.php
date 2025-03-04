@@ -41,9 +41,9 @@ class CartTest extends TestCase
             'product_id' => 1,
             'quantity' => 2,
         ]);
-
+        $this->actingAs($user);
         // Đăng nhập với người dùng đã tạo
-        $response = $this->actingAs($user)->$this->withHeaders([
+        $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
         ])->getJson('/api/app/cart');
 
