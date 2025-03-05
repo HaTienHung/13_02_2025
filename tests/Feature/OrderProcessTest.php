@@ -24,7 +24,7 @@ class OrderProcessTest extends TestCase
 
         $token = $user->createToken('TestToken')->plainTextToken;
 
-        dump("Generated Token: " . $token);
+        // dump("Generated Token: " . $token);
 
         $this->seed(CategorySeeder::class);
 
@@ -55,7 +55,7 @@ class OrderProcessTest extends TestCase
                 ['product_id' => $product->id, 'quantity' => 2]
             ]
         ]);
-        dump($response->json());
+        // dump($response->json());
         // ✅ Kiểm tra HTTP response
         $response->assertStatus(201)
             ->assertJsonStructure(['message']);
