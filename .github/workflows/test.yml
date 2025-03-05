@@ -1,6 +1,12 @@
 name: Run Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - feature-test # Chạy khi push lên nhánh feature-test
+  pull_request:
+    branches:
+      - main # Kiểm tra trước khi merge vào main
 
 jobs:
   test:
