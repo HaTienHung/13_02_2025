@@ -21,9 +21,9 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: testing_db
-      MYSQL_USER: test_user
-      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: testing_db #Change database when run CI/CD on github
+      # MYSQL_USER: test_user
+      # MYSQL_PASSWORD: secret
     volumes:
       - db_data:/var/lib/mysql
     networks:
