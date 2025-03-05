@@ -15,8 +15,8 @@ class CartTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
-    public function it_can_fetch_the_cart_of_an_authenticated_user()
+
+    public function test_it_can_fetch_the_cart_of_an_authenticated_user()
     {
         // Tạo một user
         $user = User::factory()->create();
@@ -58,7 +58,7 @@ class CartTest extends TestCase
             ],
         ]);
     }
-    public function user_can_add_item_into_cart()
+    public function test_user_can_add_item_into_cart()
     {
 
         $user = User::factory()->create();
