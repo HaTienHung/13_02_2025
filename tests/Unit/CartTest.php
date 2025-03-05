@@ -86,7 +86,8 @@ class CartTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
         ])->postJson('/api/app/cart/store', [
-            ['product_id' => $product->id, 'quantity' => 2]
+            'product_id' => $product->id,
+            'quantity' => 2
         ]);
 
         // Kiểm tra response trả về có chứa giỏ hàng của người dùng
