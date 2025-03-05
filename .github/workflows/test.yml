@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature-test # Chạy khi push lên nhánh feature-test
+      - main
   pull_request:
     branches:
       - main # Kiểm tra trước khi merge vào main
