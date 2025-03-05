@@ -77,7 +77,7 @@ class CartController extends Controller
 
     $this->cartService->addItemToCart(auth()->id(), $request->product_id, $request->quantity);
 
-    return response()->json(['message' => 'Sản phẩm đã được thêm vào giỏ hàng.'], Response::HTTP_OK);
+    return response()->json(['message' => 'Sản phẩm đã được thêm vào giỏ hàng.'], Response::HTTP_CREATED);
   }
 
   /**
