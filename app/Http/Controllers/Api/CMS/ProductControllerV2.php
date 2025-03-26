@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Cms;
+namespace App\Http\Controllers\Api\CMS;
 
 use App\Enums\Constant;
 use App\Http\Controllers\Controller;
@@ -14,14 +14,19 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @OA\Tag(
+ *     name="CMS Products",
+ * )
+ */
 
-class ProductController extends Controller
+class ProductControllerV2 extends Controller
 {
     protected ProductService $productService;
     protected ProductRepository $productRepository;
 
     /**
-     * Khởi tạo ProductController.
+     * Khởi tạo ProductControllerV2.
      *
      * @param ProductService $productService
      * @param ProductRepository $productRepository
@@ -35,8 +40,9 @@ class ProductController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/products",
-     *     tags={"APP"},
+     *     path="/api/cms/products",
+     *     tags={"CMS Products"},
+     *     security={{"bearerAuth":{}}},
      *     summary="Lấy ra danh sách sản phẩm",
      *          @OA\Parameter(
      *           in="query",
@@ -133,8 +139,9 @@ class ProductController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/products/{id}",
-     *     tags={"APP"},
+     *     path="/api/cms/products/{id}",
+     *     tags={"CMS Products"},
+     *     security={{"bearerAuth":{}}},
      *     summary="Lấy thông tin chi tiết sản phẩm",
      *     @OA\Parameter(
      *         name="id",
@@ -205,20 +212,20 @@ class ProductController extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'messsage' => trans('message.success.product.create'),
+                'message' => trans('message.success.product.create'),
                 'data' => $this->productService->createProduct($request->all())
             ], Response::HTTP_CREATED);
         } catch (Exception $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
-                'messsage' => $e->getMessage(),
+                'message' => $e->getMessage(),
             ], Response::HTTP_BAD_REQUEST);
         }
     }
 
     /**
      * @OA\Post(
-     *     path="/api/cms/product/update/{id}",
+     *     path="/api/cms/products/update/{id}",
      *     summary="Cập nhật sản phẩm",
      *     tags={"CMS Products"},
      *     security={{"bearerAuth":{}}},
@@ -277,7 +284,7 @@ class ProductController extends Controller
 
     /**
      * @OA\Delete(
-     *     path="/api/cms/product/delete/{id}",
+     *     path="/api/cms/products/delete/{id}",
      *     tags={"CMS Products"},
      *     summary="Xóa sản phẩm",
      *     security={{"bearerAuth":{}}},
@@ -321,7 +328,7 @@ class ProductController extends Controller
     }
     /**
      * @OA\Post(
-     *     path="/api/cms/product/import-excel",
+     *     path="/api/cms/products/import-excel",
      *     summary="Import danh sách sản phẩm từ file CSV",
      *     tags={"CMS Products"},
      *     security={{"bearerAuth":{}}},

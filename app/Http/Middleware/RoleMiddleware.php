@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Role;
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
@@ -12,14 +13,17 @@ class RoleMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param Closure(Request): (Response) $next
+     * @throws AuthorizationException
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
         $user = $request->user(); // Lấy user hiện tại
 
-        if (!$user || $user->role !== $role) {
-            throw new AuthorizationException("Bạn không có quyền thực hiện hành động này.");
+        $role_name = Role::where('id', $user->role_id)->first()->name;
+
+        if (!$user || $role_name !== $role) {
+            throw new AuthorizationException(trans('message.errors.auth.unauthorized'));
         }
         return $next($request);
     }

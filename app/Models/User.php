@@ -3,15 +3,30 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\FilterTrait;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @OA\Schema(
+ *     schema="User",
+ *     type="object",
+ *     @OA\Property(property="name", type="string"),
+ *     @OA\Property(property="email", type="string"),
+ *     @OA\Property(property="phone_number", type="string"),
+ * )
+ */
+
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    static $admin = 1;
+    static $user = 2;
+
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable, HasApiTokens, FilterTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -19,10 +34,9 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'name', 'email', 'phone_number', 'password',
     ];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -33,6 +47,38 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+    public function scopeOfRole($query, $type)
+    {
+        return $query->where('role_id', $type);
+    }
+    public function scopeOfEmail($query, $type)
+    {
+        return $query->where('email', $type);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role->name === 'admin';
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function orderItem()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
+    }
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -45,21 +91,5 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
-    }
-    public function orders()
-    {
-        return $this->hasMany(Order::class);
-    }
-    public function orderItem()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
-    public function cartItems()
-    {
-        return $this->hasMany(CartItem::class);
     }
 }

@@ -4,11 +4,9 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Order;
+use App\Models\InventoryTransaction;
 use App\Models\Product;
 use App\Models\User;
-use App\Models\InventoryTransaction;
-use App\Models\OrderItem;
 use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -116,7 +114,7 @@ class OrderProcessTest extends TestCase
                 ['product_id' => $product->id, 'quantity' => 5] // Yêu cầu 5 cái nhưng chỉ còn 1
             ]
         ]);
-        $response->dump();
+        // $response->dump();
 
         // ✅ Kiểm tra HTTP response 422
         $response->assertStatus(422)

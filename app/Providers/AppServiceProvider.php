@@ -3,6 +3,26 @@
 namespace App\Providers;
 
 
+use App\Models\Product;
+use App\Providers\ProductServiceProvider;
+use App\Repositories\BaseRepository;
+use App\Repositories\BaseRepositoryInterface;
+use App\Repositories\Cart\CartInterface;
+use App\Repositories\Cart\CartRepository;
+use App\Repositories\Category\CategoryInterface;
+use App\Repositories\Category\CategoryRepository;
+use App\Repositories\Inventory\InventoryInterface;
+use App\Repositories\Inventory\InventoryRepository;
+use App\Repositories\Order\OrderInterface;
+use App\Repositories\Order\OrderRepository;
+use App\Repositories\OrderItem\OrderItemInterface;
+use App\Repositories\OrderItem\OrderItemRepository;
+use App\Repositories\Product\ProductInterface;
+use App\Repositories\Product\ProductRepository;
+use App\Repositories\User\UserInterface;
+use App\Repositories\User\UserRepository;
+use Illuminate\Container\Container;
+use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 
 
@@ -15,13 +35,13 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         $repositories = [
-            \App\Repositories\BaseRepositoryInterface::class => \App\Repositories\BaseRepository::class,
-            \App\Repositories\Product\ProductInterface::class => \App\Repositories\Product\ProductRepository::class,
-            \App\Repositories\Order\OrderInterface::class => \App\Repositories\Order\OrderRepository::class,
-            \App\Repositories\OrderItem\OrderItemInterface::class => \App\Repositories\OrderItem\OrderItemRepository::class,
-            \App\Repositories\Category\CategoryInterface::class => \App\Repositories\Category\CategoryRepository::class,
-            \App\Repositories\Inventory\InventoryInterface::class => \App\Repositories\Inventory\InventoryRepository::class,
-            \App\Repositories\Cart\CartInterface::class => \App\Repositories\Cart\CartRepository::class,
+            OrderInterface::class => OrderRepository::class,
+            UserInterface::class => UserRepository::class,
+            ProductInterface::class => ProductRepository::class,
+            OrderItemInterface::class => OrderItemRepository::class,
+            CategoryInterface::class => CategoryRepository::class,
+            InventoryInterface::class => InventoryRepository::class,
+            CartInterface::class => CartRepository::class,
         ];
 
         foreach ($repositories as $interface => $repository) {
@@ -32,5 +52,8 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void {}
+    public function boot(): void
+    {
+
+    }
 }

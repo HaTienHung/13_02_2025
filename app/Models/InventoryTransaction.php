@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
  *     @OA\Property(property="quantity", type="integer"),
  * )
  */
-
 class InventoryTransaction extends Model
 {
     use HasFactory;

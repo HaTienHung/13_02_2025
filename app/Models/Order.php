@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\FilterTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,10 +15,10 @@ use Illuminate\Database\Eloquent\Model;
  *     @OA\Property(property="status", type="string"),
  * )
  */
-
 class Order extends Model
 {
     use HasFactory;
+    use FilterTrait;
 
     protected $fillable = ['user_id', 'status', 'total_price'];
 

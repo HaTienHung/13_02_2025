@@ -5,7 +5,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\{Exceptions, Middleware};
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\{AuthenticationException, Access\AuthorizationException};
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpFoundation\Response;
 
 
@@ -26,20 +25,20 @@ return Application::configure(basePath: dirname(__DIR__))
         //
         $exceptions->render(function (ValidationException $e, $request) {
             return response()->json([
-                'message' => 'Dữ liệu không hợp lệ.',
+                'message' => trans('message.errors.validation.invalid_data'),
                 'errors' => $e->errors(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         });
 
         $exceptions->render(function (AuthenticationException $e, $request) {
             return response()->json([
-                'message' => 'Bạn chưa đăng nhập.',
+                'message' => trans('message.errors.auth.unauthorized'),
             ], Response::HTTP_UNAUTHORIZED);
         });
 
         $exceptions->render(function (AuthorizationException $e, $request) {
             return response()->json([
-                'message' => 'Bạn không có quyền thực hiện hành động này.',
+                'message' => trans('message.errors.auth.forbidden'),
             ], Response::HTTP_FORBIDDEN);
         });
 

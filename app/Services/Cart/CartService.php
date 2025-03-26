@@ -3,104 +3,35 @@
 namespace App\Services\Cart;
 
 use App\Repositories\Cart\CartInterface;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Services\Order\OrderService;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Symfony\Component\HttpFoundation\Response;
 
 
 class CartService
 {
-  protected $cartRepository;
-  protected $orderService;
+    protected CartInterface $cartRepository;
+    protected OrderService $orderService;
 
-  public function __construct(CartInterface $cartRepository, OrderService $orderService)
-  {
-    $this->cartRepository = $cartRepository;
-    $this->orderService = $orderService;
-  }
-
-  public function getCart($userId)
-  {
-    return $this->cartRepository->getCartItems($userId);
-  }
-
-  public function addItemToCart($userId, $productId, $quantity)
-  {
-    // Kiểm tra xem sản phẩm có trong giỏ hàng chưa
-    $cartItem = $this->cartRepository->findOneBy([
-      'user_id' => $userId,
-      'product_id' => $productId
-    ]);
-
-    if ($cartItem) {
-      // Nếu đã tồn tại, cập nhật số lượng
-      $newQuantity = $cartItem->quantity + $quantity;
-      return $this->cartRepository->updateCartItem($cartItem, $newQuantity);
+    public function __construct(CartInterface $cartRepository, OrderService $orderService)
+    {
+        $this->cartRepository = $cartRepository;
+        $this->orderService = $orderService;
     }
 
-    // Nếu chưa có, thêm mới vào giỏ hàng
-    return $this->cartRepository->createCartItem($userId, $productId, $quantity);
-  }
+    public function checkout($userId, array $productIds)
+    {
+        $itemsToOrder = $this->cartRepository->findAllBy([
+            ['user_id', '=', auth()->id()],
+            ['product_id', 'in', $productIds]
+        ]);
 
-  public function updateCartItem($userId, $productId, $quantity)
-  {
-    $cartItem = $this->cartRepository->findOneBy([
-      'user_id' => $userId,
-      'product_id' => $productId
-    ]);
-    if (!$cartItem) {
-      throw new ModelNotFoundException("Sản phẩm không có trong giỏ hàng.", Response::HTTP_NOT_FOUND);
+        $order = $this->orderService->createOrder($userId, $itemsToOrder);
+
+        // Xóa các sản phẩm đã đặt khỏi giỏ hàng
+        $this->cartRepository->deleteBy([
+            ['user_id', '=', $userId],
+            ['product_id', 'in', $productIds]
+        ]);
+
+        return $order;
     }
-
-    return $this->cartRepository->updateCartItem($cartItem, $quantity);
-    return $cartItem;
-  }
-
-
-  public function removeCartItems($userId, array $productIds)
-  {
-    // Lọc ra những sản phẩm thực sự có trong giỏ hàng
-    $cartItems = $this->cartRepository->findBy([
-      'user_id' => $userId,
-      'product_id' => $productIds
-    ]);
-
-    if ($cartItems->isEmpty()) {
-      throw new HttpResponseException(response()->json([
-        'message' => 'Xoá thất bại: Không có sản phẩm nào trong giỏ hàng.',
-      ], Response::HTTP_UNPROCESSABLE_ENTITY));
-    }
-
-    // Xóa các sản phẩm có trong danh sách
-    return $this->cartRepository->removeCartItems($userId, $productIds);
-  }
-
-  public function clearCart($userId)
-  {
-    return $this->cartRepository->clearCart($userId);
-  }
-
-  public function checkout($userId, array $productIds)
-  {
-    $cartItems = $this->cartRepository->getCartItems($userId);
-
-    if ($cartItems->isEmpty()) {
-      throw new \Exception("Giỏ hàng trống.", Response::HTTP_UNPROCESSABLE_ENTITY);
-    }
-
-    // Lọc ra các sản phẩm được đặt hàng
-    $itemsToOrder = $cartItems->whereIn('product_id', $productIds);
-
-    if ($itemsToOrder->isEmpty()) {
-      throw new \Exception("Không có sản phẩm hợp lệ để đặt hàng.", Response::HTTP_UNPROCESSABLE_ENTITY);
-    }
-
-    $order = $this->orderService->createOrder($userId, $itemsToOrder);
-
-    // Xóa chỉ những sản phẩm đã đặt khỏi giỏ hàng
-    $this->cartRepository->removeCartItems($userId, $productIds);
-
-    return $order;
-  }
 }

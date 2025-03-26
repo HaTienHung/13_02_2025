@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Cms;
+namespace App\Http\Controllers\Api\CMS;
 
 use App\Enums\Constant;
 use App\Http\Controllers\Controller;
@@ -11,13 +11,18 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class CategoryController extends Controller
+/**
+ * @OA\Tag(
+ *     name="CMS Categories",
+ * )
+ */
+class CategoryControllerV2 extends Controller
 {
     protected CategoryService $categoryService;
     protected CategoryInterface $categoryRepository;
 
     /**
-     * Khởi tạo CategoryController.
+     * Khởi tạo CategoryControllerV2.
      *
      * @param CategoryService $categoryService
      * @param CategoryInterface $categoryRepository
@@ -31,8 +36,9 @@ class CategoryController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/categories",
-     *     tags={"APP"},
+     *     path="/api/cms/categories",
+     *     security={{"bearerAuth":{}}},
+     *     tags={"CMS Categories"},
      *     summary="Lấy ra danh sách danh mục",
      *     @OA\Response(
      *         response=200,
@@ -53,8 +59,9 @@ class CategoryController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/categories/{id}/products",
-     *     tags={"APP"},
+     *     path="/api/cms/categories/{id}/products",
+     *     tags={"CMS Categories"},
+     *     security={{"bearerAuth":{}}},
      *     summary="Lấy danh sách sản phẩm dựa vào Danh mục",
      *     @OA\Parameter(
      *         name="id",

@@ -7,20 +7,21 @@ use App\Repositories\BaseRepository;
 
 class InventoryRepository extends BaseRepository implements InventoryInterface
 {
-  public function __construct(InventoryTransaction $inventory)
-  {
-    parent::__construct($inventory);
-  }
-  public function getImportProduct($productId)
-  {
-    return $this->model->where('product_id', $productId)->where('type', 'import')->sum('quantity');
-  }
-  public function getExportProduct($productId)
-  {
-    return $this->model->where('product_id', $productId)->where('type', 'export')->sum('quantity');
-  }
-  public function showInventoryRecords($productId)
-  {
-    return $this->model->where('product_id', $productId)->get();
-  }
+    public function __construct(InventoryTransaction $inventoryTransaction)
+    {
+        parent::__construct($inventoryTransaction);
+    }
+
+    public function getImportProduct($productId)
+    {
+
+        return $this->findAllBy([['product_id', '=', $productId], ['type', '=', 'import']])->sum('quantity');
+    }
+
+    public function getExportProduct($productId)
+    {
+
+        return $this->findAllBy([['product_id', '=', $productId], ['type', '=', 'export']])->sum('quantity');
+    }
+
 }

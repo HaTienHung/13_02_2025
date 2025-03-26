@@ -3,18 +3,19 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Models\User;
-use App\Models\CartItem;  // Giả sử bạn có model Cart
+use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\User;
 use Database\Seeders\CategorySeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+// Giả sử bạn có model Cart
 
 class CartTest extends TestCase
 {
     use RefreshDatabase;
-
 
     public function test_it_can_fetch_the_cart_of_an_authenticated_user()
     {
@@ -58,6 +59,7 @@ class CartTest extends TestCase
             ],
         ]);
     }
+
     public function test_user_can_add_item_into_cart()
     {
 

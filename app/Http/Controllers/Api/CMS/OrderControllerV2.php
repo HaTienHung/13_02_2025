@@ -1,49 +1,115 @@
 <?php
 
-namespace App\Http\Controllers\Api\Cms;
+namespace App\Http\Controllers\Api\CMS;
 
-use App\Services\Order\OrderService;
-use Illuminate\Http\Request;
+use App\Enums\Constant;
+use App\Exports\OrderV2Export;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use DB;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Resources\OrderResource;
+use App\Models\User;
+use App\Repositories\Order\OrderRepository;
+use App\Services\Order\OrderService;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
+
+/**
+ * @OA\Tag(
+ *     name="CMS Orders",
+ * )
+ */
 
 class OrderControllerV2 extends Controller
 {
-    protected $orderService;
+    protected OrderService $orderService;
+    protected OrderRepository $orderRepository;
 
     /**
      * Khởi tạo OrderController.
-     * 
+     *
      * @param OrderService $orderService
+     * @param OrderRepository $orderRepository
      */
 
-    public function __construct(OrderService $orderService)
+    public function __construct(OrderService $orderService, OrderRepository $orderRepository)
     {
         $this->orderService = $orderService;
+        $this->orderRepository = $orderRepository;
     }
 
     /**
      * @OA\Get(
      *     path="/api/cms/orders/",
      *     tags={"CMS Orders"},
-     *     summary="Get list of orders",
+     *     summary="Lấy ra danh sách tất cả đơn hàng",
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *           in="query",
+     *           name="searchFields[]",
+     *           required=false,
+     *           description="List of fields to search. Example: ['name_booking']",
+     *          @OA\Schema(
+     *             type="array",
+     *             @OA\Items(
+     *               type="string",
+     *               example="name_booking"
+     *              )
+     *           ),
+     *      ),
+     *     @OA\Parameter(
+     *            in="query",
+     *            name="search",
+     *            required=false,
+     *            description="Content search. Example: 'Thiên'",
+     *            @OA\Schema(
+     *              type="string",
+     *              example="Thiên",
+     *            ),
+     *       ),
+     *     @OA\Parameter(
+     *             in="query",
+     *             name="filter",
+     *             required=false,
+     *             description="Filter criteria in JSON format. Example: {""created_at_RANGE"": [""2024-01-20"", ""2024-01-28""]}",
+     *             @OA\Schema(
+     *              type="string",
+     *              example="{""created_at_RANGE"": [""2024-01-20"", ""2024-01-28""]}",
+     *            ),
+     *        ),
+     *     @OA\Parameter(
+     *              in="query",
+     *              name="sort[]",
+     *              required=false,
+     *              description="Sort criteria in array format. Use '-' for descending order and '+' for ascending order. Example: ['-created_at']",
+     *              @OA\Schema(
+     *             type="array",
+     *             @OA\Items(
+     *               type="string",
+     *               example="-created_at"
+     *              )
+     *           ),
+     *         ),
      *     @OA\Response(
      *         response=200,
-     *         description="A list of orders",
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Order"))
-     *     )
+     *         description="Success",
+     *             @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Success."),
+     *          )
+     *     ),
      * )
      */
 
-    public function index()
+    public function index(): JsonResponse
     {
-        return response()->json($this->orderService->getAllOrders(), Response::HTTP_OK);
+        $orders = $this->orderRepository->listOrder();
+        return response()->json(['message' => 'Danh sách đơn hàng:', 'orders' => OrderResource::collection($orders)], Response::HTTP_OK);
     }
+
     /**
      * @OA\Get(
      *     path="/api/cms/orders/show/{id}",
@@ -84,21 +150,29 @@ class OrderControllerV2 extends Controller
      *     )
      * )
      */
-    public function getOrderDetails($orderId)
+    public function getOrderDetails($id): JsonResponse
     {
         try {
-            $orderDetails = $this->orderService->getOrderDetails($orderId);
+            $orderDetails = $this->orderRepository->findById($id, ['orderItems']);
 
             return response()->json([
+                'status' => Constant::SUCCESS_CODE,
                 'message' => 'Chi tiết sản phẩm trong đơn hàng của bạn',
-                'details' => OrderResource::collection($orderDetails)
+                'data' => new OrderResource($orderDetails)
             ], Response::HTTP_OK);
-        } catch (ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) { //FirstOrFail tu dong nem ra ModelNotFound
             return response()->json([
-                'message' => 'Không tìm thấy đơn hàng.'
+                'status' => Constant::FALSE_CODE,
+                'message' => trans('message.errors.not_found')
+            ], Response::HTTP_NOT_FOUND);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => Constant::FALSE_CODE,
+                'message' => $e->getMessage()
             ], Response::HTTP_NOT_FOUND);
         }
     }
+
     /**
      * Tạo đơn hàng mới.
      *
@@ -157,18 +231,19 @@ class OrderControllerV2 extends Controller
      * @return JsonResponse
      */
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        $request->validate([
-            'user_name' => 'required|string|max:255',
-            'user_email' => 'required|email|unique:users,email',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1'
-        ]);
-
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
+
+            $request->validate([
+                'user_name' => 'required|string|max:255',
+                'user_email' => 'required|email|unique:users,email',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|exists:products,id',
+                'items.*.quantity' => 'required|integer|min:1'
+            ]);
+
             // Tạo user mới trong transaction
             $user = User::create([
                 'name' => $request->user_name,
@@ -183,15 +258,20 @@ class OrderControllerV2 extends Controller
             DB::commit();
 
             return response()->json([
-                'message' => 'Admin tạo đơn hàng thành công!',
+                'status' => Constant::SUCCESS_CODE,
+                'message' => trans('message.success.order.create'),
                 'order_id' => $order->id
             ], Response::HTTP_CREATED);
-        } catch (\Exception $e) {
+        } catch (Throwable $th) {
             // Nếu có lỗi, rollback lại tất cả thay đổi (bao gồm xóa user)
             DB::rollBack();
-            return response()->json(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+            return response()->json([
+                'status' => Constant::FALSE_CODE,
+                'message' => $th->getMessage()
+            ], Response::HTTP_NOT_FOUND);
         }
     }
+
     /**
      * @OA\Put(
      *     path="/api/cms/orders/update/{id}",
@@ -209,7 +289,7 @@ class OrderControllerV2 extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"items", "status"},  
+     *             required={"items", "status"},
      *             @OA\Property(
      *                 property="items",
      *                 type="array",
@@ -223,8 +303,8 @@ class OrderControllerV2 extends Controller
      *             @OA\Property(
      *                 property="status",
      *                 type="string",
-     *                 example="pending",  
-     *                 enum={"pending", "completed", "cancelled"},  
+     *                 example="pending",
+     *                 enum={"pending", "completed", "cancelled"},
      *                 description="Trạng thái đơn hàng"
      *             )
      *         )
@@ -253,28 +333,34 @@ class OrderControllerV2 extends Controller
      * )
      */
 
-    public function update(Request $request, $orderId)
+    public function update(Request $request, $id): JsonResponse
     {
-        // Validate các trường thông tin đầu vào
-        $request->validate([
-            'status' => 'required|in:pending,completed,cancelled',
-            'items' => 'required|array', // Đảm bảo items là mảng
-            'items.*.product_id' => 'required|integer|min:1|exists:products,id', // Kiểm tra sản phẩm tồn tại trong bảng products
-            'items.*.quantity' => 'required|integer|min:1', // Kiểm tra số lượng hợp lệ cho từng sản phẩm
-        ]);
-
         // Truyền userId (auth()->id()) và items từ request vào phương thức updateOrder
         try {
-            $order = $this->orderService->updateOrder(auth()->id(), $orderId, $request->items, $request->status);
+            // Validate các trường thông tin đầu vào
+            $request->validate([
+                'status' => 'required|in:pending,completed,cancelled',
+                'items' => 'required|array', // Đảm bảo items là mảng
+                'items.*.product_id' => 'required|integer|min:1|exists:products,id', // Kiểm tra sản phẩm tồn tại trong bảng products
+                'items.*.quantity' => 'required|integer|min:1', // Kiểm tra số lượng hợp lệ cho từng sản phẩm
+            ]);
+
+            $order = $this->orderService->updateOrder(auth()->id(), $id, $request->items, $request->status);
 
             return response()->json([
-                'message' => 'Đơn hàng đã được cập nhật thành công',
-                'order' => $order
-            ], REsponse::HTTP_OK);
+                'status' => Constant::SUCCESS_CODE,
+                'message' => trans('message.success.order.update'),
+                'data' => new OrderResource($order)
+            ], Response::HTTP_OK);
         } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Không tìm thấy đơn hàng'], Response::HTTP_BAD_REQUEST);
+            return response()->json([
+                'status' => Constant::FALSE_CODE,
+                'message' => $e->getMessage(),
+                'data' => []
+            ], Response::HTTP_BAD_REQUEST);
         }
     }
+
     /**
      * @OA\Delete(
      *     path="/api/cms/orders/delete/{id}",
@@ -299,14 +385,86 @@ class OrderControllerV2 extends Controller
      *     @OA\Response(response=404, description="Không tìm thấy đơn hàng")
      * )
      */
-    public function destroy($orderId)
+    public function destroy($id): JsonResponse
     {
         try {
-            $this->orderService->deleteOrder($orderId);
+            $this->orderService->deleteOrder($id);
 
-            return response()->json(['message' => 'Đơn hàng đã được xoá thành công']);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'Không tìm thấy đơn hàng'], Response::HTTP_NOT_FOUND);
+            return response()->json([
+                'status' => Constant::SUCCESS_CODE,
+                'message' => trans('message.success.order.delete')
+            ], Response::HTTP_OK);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => Constant::FALSE_CODE,
+                'message' => $e->getMessage(),
+            ], Response::HTTP_NOT_FOUND);
         }
     }
+
+    /**
+     * @OA\Get (
+     *     path="/api/cms/orders/export-excel",
+     *     tags={"CMS Orders"},
+     *     summary="Xuất Excel",
+     *     security={{"bearerAuth":{}}},
+     *     operationId="order/export-excel",
+     *     @OA\Parameter(
+     *           in="query",
+     *           name="searchFields[]",
+     *           required=false,
+     *           description="List of fields to search. Example: ['name']",
+     *          @OA\Schema(
+     *             type="array",
+     *             @OA\Items(
+     *               type="string",
+     *               example="name"
+     *              )
+     *           ),
+     *      ),
+     *     @OA\Parameter(
+     *            in="query",
+     *            name="search",
+     *            required=false,
+     *            description="Content search. Example: 'Tin tuc'",
+     *            @OA\Schema(
+     *              type="string",
+     *              example="Tin tuc",
+     *            ),
+     *       ),
+     *     @OA\Parameter(
+     *             in="query",
+     *             name="filter",
+     *             required=false,
+     *             description="Filter criteria in JSON format. Example: {""created_at_RANGE"": [""2024-01-20"", ""2024-01-28""]}",
+     *             @OA\Schema(
+     *              type="string",
+     *              example="{""created_at_RANGE"": [""2024-01-20"", ""2024-01-28""]}",
+     *            ),
+     *        ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *             @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Success."),
+     *          )
+     *     ),
+     * )
+     */
+    public function exportExcel()
+    {
+        try {
+            $orders = $this->orderRepository->listOrder();
+//            return response()->json(['orders' => $orders]);
+        } catch (Throwable $th) {
+            return response()->json([
+                'status' => Constant::FALSE_CODE,
+                'message' => $th->getMessage(),
+                'data' => []
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        return Excel::download(new OrderV2Export($orders),
+            'Order' . str_replace('/', '-', date('Y/m/d')) . '.xlsx');
+    }
+
 }

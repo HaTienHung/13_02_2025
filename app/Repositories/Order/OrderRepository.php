@@ -7,18 +7,15 @@ use App\Repositories\BaseRepository;
 
 class OrderRepository extends BaseRepository implements OrderInterface
 {
-  public function __construct(Order $order)
-  {
-    parent::__construct($order);
-  }
-  public function getOrdersByUserID($userId)
-  {
-    return $this->model->where('user_id', $userId)->get(); //Lấy tất cả các đơn hàng của người dùng
-  }
-  public function getOrderDetails($orderId)
-  {
-    return $this->model->where('id', $orderId)
-      ->with('orderItems.product') // Lấy luôn sản phẩm trong đơn
-      ->get();
-  }
+    public function __construct(Order $order)
+    {
+        parent::__construct($order);
+    }
+    public function listOrder()
+    {
+        $orders = $this->model->with('orderItems.product')->search(request('searchFields'), request('search'))
+            ->filter(request('filter'))
+            ->sort(request('sort'))->get();
+        return $orders;
+    }
 }

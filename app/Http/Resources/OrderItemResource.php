@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderItemResource extends JsonResource
@@ -11,10 +10,8 @@ class OrderItemResource extends JsonResource
     {
         return [
             'quantity' => $this->quantity,
-            'product' => [
-                'name' => $this->product->name,
-                'price' => $this->product->price
-            ]
+            'product_name' => $this->product->name,
+            'unit_price' => $this->product->price,
         ];
     }
 }
