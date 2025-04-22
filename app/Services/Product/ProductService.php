@@ -10,16 +10,11 @@ class ProductService
     use FileUploadTrait;
 
 
-    protected $productRepository;
+    protected ProductInterface $productRepository;
 
     public function __construct(ProductInterface $productRepository)
     {
         $this->productRepository = $productRepository;
-    }
-
-    public function getAllProducts()
-    {
-        return $this->productRepository->all();
     }
 
     public function getProductById($id)
@@ -30,7 +25,7 @@ class ProductService
     public function createProduct(array $data)
     {
         if (isset($data['image'])) {
-            $data['image'] = $this->uploadFile($data['image'], 'products');
+            $data['image'] = $this->uploadFile($data['image']);
         }
 
         return $this->productRepository->create($data);
@@ -47,7 +42,7 @@ class ProductService
 
         // Nếu có ảnh mới, upload ảnh và cập nhật đường dẫn
         if (isset($data['image'])) {
-            $data['image'] = $this->uploadFile($data['image'], 'products');
+            $data['image'] = $this->uploadFile($data['image']);
         }
         return $this->productRepository->update($id, $data);
     }

@@ -13,7 +13,7 @@ class OrderRepository extends BaseRepository implements OrderInterface
     }
     public function listOrder()
     {
-        $orders = $this->model->with('orderItems.product')->search(request('searchFields'), request('search'))
+        $orders = $this->model->with(['orderItems.product','user'])->search(request('searchFields'), request('search'))
             ->filter(request('filter'))
             ->sort(request('sort'))->get();
         return $orders;

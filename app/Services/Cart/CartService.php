@@ -4,6 +4,8 @@ namespace App\Services\Cart;
 
 use App\Repositories\Cart\CartInterface;
 use App\Services\Order\OrderService;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
 
 
 class CartService
@@ -33,5 +35,30 @@ class CartService
         ]);
 
         return $order;
+    }
+    public function updateMultipleItems(array $cartItems, int $userId): array
+    {
+        DB::beginTransaction();
+        try {
+            foreach ($cartItems as $item) {
+                $this->cartRepository->createOrUpdate(
+                    $item,
+                    [['user_id', '=', $userId], ['product_id', '=', $item['product_id']]]
+                );
+            }
+
+            DB::commit();
+            return [
+                'status' => Response::HTTP_OK,
+                'message' => trans('message.success.cart.update')
+            ];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return [
+                'status' => Response::HTTP_BAD_REQUEST,
+                'message' => $e->getMessage(),
+                'data' => []
+            ];
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services\Inventory;
 
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Product\ProductRepository;
+use Illuminate\Http\Request;
 
 class InventoryService
 {
@@ -40,13 +41,17 @@ class InventoryService
 
     public function getStockReport()
     {
-        return $this->productRepository->all()->map(function ($product) {
+        $products = $this->productRepository->listProduct();
+
+        $products->getCollection()->transform(function ($product) {
             return [
                 'product_id' => $product->id,
                 'product_name' => $product->name,
                 'stock' => $this->getStock($product->id)
             ];
         });
+
+        return $products;
     }
 
     public function getStock($productId)

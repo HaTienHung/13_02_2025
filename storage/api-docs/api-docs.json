@@ -121,6 +121,11 @@
                                         "format": "email",
                                         "example": "nguyenvana@example.com"
                                     },
+                                    "address": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "Ha Noi"
+                                    },
                                     "phone_number": {
                                         "type": "string",
                                         "example": "0387768880"
@@ -165,6 +170,10 @@
                                                 "email": {
                                                     "type": "string",
                                                     "example": "nguyenvana@example.com"
+                                                },
+                                                "address": {
+                                                    "type": "string",
+                                                    "example": "Ha Noi"
                                                 },
                                                 "phone_number": {
                                                     "type": "string",
@@ -272,17 +281,24 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "product_id",
-                                    "quantity"
+                                    "items"
                                 ],
                                 "properties": {
-                                    "product_id": {
-                                        "type": "integer",
-                                        "example": 1
-                                    },
-                                    "quantity": {
-                                        "type": "integer",
-                                        "example": 3
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "product_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -356,6 +372,90 @@
                                         "deleted_count": {
                                             "type": "integer",
                                             "example": 3
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Chưa đăng nhập",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/app/cart/delete/{id}": {
+            "delete": {
+                "tags": [
+                    "APP Cart"
+                ],
+                "summary": "Xóa sản phẩm khỏi giỏ hàng",
+                "description": "Xóa một sản phẩm khỏi giỏ hàng của người dùng đã đăng nhập.",
+                "operationId": "b046208a03c4ab82c7f204c6d9c1be2d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID của sản phẩm cần xóa",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Xóa sản phẩm thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Xóa sản phẩm thành công."
+                                        },
+                                        "deleted_count": {
+                                            "type": "integer",
+                                            "example": 1
                                         }
                                     },
                                     "type": "object"
@@ -573,6 +673,54 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/api/categories/{slug}": {
+            "get": {
+                "tags": [
+                    "APP Categories"
+                ],
+                "summary": "Lấy danh sách sản phẩm dựa vào slug của danh mục",
+                "operationId": "99c4e6ec39a398a5b4d330ffb323726a",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Trang",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug của danh mục",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Danh sách sản phẩm của danh mục",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Product"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Không tìm thấy danh mục"
                     }
                 }
             }
@@ -1052,13 +1200,40 @@
                 }
             }
         },
-        "/api/products/{id}": {
+        "/api": {
+            "get": {
+                "tags": [
+                    "APP Products"
+                ],
+                "summary": "Lấy ra danh sách sản phẩm mới nhất",
+                "operationId": "37f1ac63ab70397d2fb31855d6731f0e",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/products/id/{id}": {
             "get": {
                 "tags": [
                     "APP Products"
                 ],
                 "summary": "Lấy thông tin chi tiết sản phẩm",
-                "operationId": "f5bef40b30ae126e2afb4b3fd605045b",
+                "operationId": "d6dcbbd878bca2eec01623219ac84c4a",
                 "parameters": [
                     {
                         "name": "id",
@@ -1067,6 +1242,38 @@
                         "required": true,
                         "schema": {
                             "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A product detail",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/products/{slug}": {
+            "get": {
+                "tags": [
+                    "APP Products"
+                ],
+                "summary": "Lấy thông tin chi tiết sản phẩm",
+                "operationId": "cef4584708527d06438e20d096c95c06",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug của sản phẩm",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 ],
@@ -1262,18 +1469,89 @@
                 "tags": [
                     "CMS Categories"
                 ],
-                "summary": "Lấy ra danh sách danh mục",
+                "summary": "Lấy ra danh sách danh muc",
                 "operationId": "9e2fa9d524f8b8a8c978a614c85bb17f",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Trang",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "perpage",
+                        "in": "query",
+                        "description": "Per Page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    },
+                    {
+                        "name": "searchFields[]",
+                        "in": "query",
+                        "description": "List of fields to search. Example: ['name_booking']",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "example": "name_booking"
+                            }
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Content search. Example: 'Thiên'",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Thiên"
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filter criteria in JSON format. Example: {\"created_at_RANGE\": [\"2024-01-20\", \"2024-01-28\"]}",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "{\"created_at_RANGE\": [\"2024-01-20\", \"2024-01-28\"]}"
+                        }
+                    },
+                    {
+                        "name": "sort[]",
+                        "in": "query",
+                        "description": "Sort criteria in array format. Use '-' for descending order and '+' for ascending order. Example: ['-created_at']",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "example": "-created_at"
+                            }
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "A list of products",
+                        "description": "Success",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Category"
-                                    }
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success."
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -1286,13 +1564,13 @@
                 ]
             }
         },
-        "/api/cms/categories/{id}/products": {
+        "/api/cms/categories/{id}/": {
             "get": {
                 "tags": [
                     "CMS Categories"
                 ],
-                "summary": "Lấy danh sách sản phẩm dựa vào Danh mục",
-                "operationId": "8322920b51a38e70bbef99b295e8fbc0",
+                "summary": "Lấy chi tiet Danh mục",
+                "operationId": "197ece1c6c05fe7bd671c6a3693664a9",
                 "parameters": [
                     {
                         "name": "id",
@@ -1385,13 +1663,17 @@
                             "schema": {
                                 "required": [
                                     "name",
-                                    "price",
+                                    "slug",
                                     "category_id"
                                 ],
                                 "properties": {
                                     "name": {
                                         "type": "string",
                                         "example": ".."
+                                    },
+                                    "slug": {
+                                        "type": "string",
+                                        "example": "do-an"
                                     }
                                 },
                                 "type": "object"
@@ -1477,6 +1759,123 @@
                 ]
             }
         },
+        "/api/cms/dashboard": {
+            "get": {
+                "tags": [
+                    "CMS Dashboard"
+                ],
+                "summary": "Lấy thống kê tổng số khách hàng, đơn hàng, doanh thu",
+                "description": "Trả về tổng số khách hàng (role=user), đơn hàng và tổng doanh thu",
+                "operationId": "getStats",
+                "responses": {
+                    "200": {
+                        "description": "Thống kê thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "total_customers": {
+                                            "type": "integer",
+                                            "example": 120
+                                        },
+                                        "total_orders": {
+                                            "type": "integer",
+                                            "example": 432
+                                        },
+                                        "total_revenue": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 1045000.5
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Không có quyền truy cập"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cms/dashboard/latest-invoices": {
+            "get": {
+                "tags": [
+                    "CMS Dashboard"
+                ],
+                "summary": "Lấy ra danh sách 5 đơn hàng mới nhất",
+                "description": "Trả về 5 đơn hàng mới nhất",
+                "operationId": "getLatestInvoices",
+                "responses": {
+                    "200": {
+                        "description": "Thống kê thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "latest-invoices": {
+                                            "type": "integer",
+                                            "example": 120
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Không có quyền truy cập"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cms/dashboard/revenue": {
+            "get": {
+                "tags": [
+                    "CMS Dashboard"
+                ],
+                "summary": "Lấy ra doanh thu theo ngày",
+                "description": "Trả về doanh thu ngày",
+                "operationId": "getRevenueByDay",
+                "responses": {
+                    "200": {
+                        "description": "Thống kê thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "latest-invoices": {
+                                            "type": "integer",
+                                            "example": 120
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Không có quyền truy cập"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/cms/inventories/create": {
             "post": {
                 "tags": [
@@ -1527,20 +1926,94 @@
                 ]
             }
         },
-        "/api/cms/inventories/show": {
+        "/api/cms/inventories": {
             "get": {
                 "tags": [
                     "CMS Inventories"
                 ],
                 "summary": "Lấy báo cáo tồn kho",
-                "operationId": "52f0ef12ce96421f2a0b0dd470620413",
+                "operationId": "6987a1b3369a59afabe069db444e1b35",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Trang",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "perpage",
+                        "in": "query",
+                        "description": "Per Page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    },
+                    {
+                        "name": "searchFields[]",
+                        "in": "query",
+                        "description": "List of fields to search. Example: ['name_booking']",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "example": "name_booking"
+                            }
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Content search. Example: 'Thiên'",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Thiên"
+                        }
+                    },
+                    {
+                        "name": "filter",
+                        "in": "query",
+                        "description": "Filter criteria in JSON format. Example: {\"created_at_RANGE\": [\"2024-01-20\", \"2024-01-28\"]}",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "{\"created_at_RANGE\": [\"2024-01-20\", \"2024-01-28\"]}"
+                        }
+                    },
+                    {
+                        "name": "sort[]",
+                        "in": "query",
+                        "description": "Sort criteria in array format. Use '-' for descending order and '+' for ascending order. Example: ['-created_at']",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "example": "-created_at"
+                            }
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Stock Report",
+                        "description": "Success",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Inventory"
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success."
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -1869,29 +2342,9 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "items",
                                     "status"
                                 ],
                                 "properties": {
-                                    "items": {
-                                        "description": "Danh sách sản phẩm trong đơn hàng",
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "product_id": {
-                                                    "description": "ID sản phẩm",
-                                                    "type": "integer",
-                                                    "example": 5
-                                                },
-                                                "quantity": {
-                                                    "description": "Số lượng sản phẩm",
-                                                    "type": "integer",
-                                                    "example": 2
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
                                     "status": {
                                         "description": "Trạng thái đơn hàng",
                                         "type": "string",
@@ -2216,13 +2669,13 @@
                 ]
             }
         },
-        "/api/cms/product/create": {
+        "/api/cms/products/create": {
             "post": {
                 "tags": [
                     "CMS Products"
                 ],
                 "summary": "Tạo sản phẩm mới",
-                "operationId": "8968a26829ab98637c611402f3304273",
+                "operationId": "6a4881953f7193dffa4d7b9aa3ba8934",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2287,7 +2740,11 @@
                                     },
                                     "name": {
                                         "type": "string",
-                                        "example": "Bánh ngọt"
+                                        "example": "Một vài thông tin về "
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "..."
                                     },
                                     "price": {
                                         "type": "number",
@@ -2646,6 +3103,9 @@
                 "properties": {
                     "name": {
                         "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
                     }
                 },
                 "type": "object"
@@ -2682,6 +3142,9 @@
             "Product": {
                 "properties": {
                     "name": {
+                        "type": "string"
+                    },
+                    "description": {
                         "type": "string"
                     },
                     "price": {
@@ -2744,6 +3207,9 @@
         },
         {
             "name": "CMS Categories"
+        },
+        {
+            "name": "CMS Dashboard"
         },
         {
             "name": "CMS Inventories"

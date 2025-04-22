@@ -19,9 +19,19 @@ class ProductRepository extends BaseRepository implements ProductInterface
     // Có thể thêm các phương thức đặc biệt riêng cho Product nếu cần
     public function listProduct($perpage = Constant::PER_PAGE)
     {
-        $products = $this->model->search(request('searchFields'), request('search'))
+        $products = $this->model->with('category')->search(request('searchFields'), request('search'))
             ->filter(request('filter'))
             ->sort(request('sort'))->paginate($perpage);
+        return $products;
+    }
+    public function getLastestProducts($limit=8)
+    {
+        return $this->model->orderBy('created_at', 'desc')->take($limit)->get();
+    }
+    public function paginateByCategoryId($id,$perPage = Constant::PER_PAGE)
+    {
+        $products = $this->model->where('category_id',$id)->latest()
+            ->paginate($perPage);
         return $products;
     }
 }

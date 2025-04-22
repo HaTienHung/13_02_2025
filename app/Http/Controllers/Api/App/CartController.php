@@ -79,18 +79,39 @@ class CartController extends Controller
     public function addToCart(Request $request): JsonResponse
     {
         try {
+            // Validate dữ liệu đầu vào
             $data = $request->validate([
                 'product_id' => 'required|exists:products,id',
                 'quantity' => 'required|integer|min:1'
             ]);
+
+            // Lấy ID người dùng hiện tại
             $data['user_id'] = auth()->id();
 
-            $this->cartRepository->createOrUpdate($data);
+            // Kiểm tra xem sản phẩm đã có trong giỏ hàng hay chưa
+            $existingCartItem = $this->cartRepository->getFirstBy([
+                ['user_id', '=', $data['user_id']],
+                ['product_id', '=', $data['product_id']]
+            ]);
 
-            return response()->json([
-                'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.cart.create')
-            ], Response::HTTP_CREATED);
+            if ($existingCartItem) {
+                // Nếu có, chỉ cần cập nhật số lượng
+                $updatedQuantity = $existingCartItem->quantity + $data['quantity'];
+                $this->cartRepository->update($existingCartItem->id, ['quantity' => $updatedQuantity]);
+
+                return response()->json([
+                    'status' => Constant::SUCCESS_CODE,
+                    'message' => trans('message.success.cart.store')
+                ], Response::HTTP_OK);
+            } else {
+                // Nếu không, tạo mới mục giỏ hàng
+                $this->cartRepository->createOrUpdate($data);
+
+                return response()->json([
+                    'status' => Constant::SUCCESS_CODE,
+                    'message' => trans('message.success.cart.create')
+                ], Response::HTTP_CREATED);
+            }
         } catch (Exception $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
@@ -98,7 +119,6 @@ class CartController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
-
     /**
      * @OA\Put(
      *     path="/api/app/cart/update",
@@ -108,9 +128,15 @@ class CartController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"product_id", "quantity"},
-     *             @OA\Property(property="product_id", type="integer", example=1),
-     *             @OA\Property(property="quantity", type="integer", example=3)
+     *             required={"items"},
+     *             @OA\Property(
+     *                 property="items",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="product_id", type="integer", example=1),
+     *                     @OA\Property(property="quantity", type="integer", example=3)
+     *                 )
+     *             )
      *         )
      *     ),
      *     @OA\Response(response=200, description="Cập nhật số lượng thành công"),
@@ -122,19 +148,21 @@ class CartController extends Controller
     {
         try {
             $data = $request->validate([
-                'product_id' => [
+                'items' => 'required|array',
+                'items.*.product_id' => [
                     'required',
                     'integer',
                     Rule::exists('cart_items', 'product_id')->where('user_id', auth()->id())
                 ],
-                'quantity' => 'required|integer|min:1'
+                'items.*.quantity' => 'required|integer|min:1'
             ]);
 
-            $this->cartRepository->createOrUpdate($data, [['user_id', '=', auth()->id()], ['product_id', '=', $data['product_id']]]);
+            $this->cartService->updateMultipleItems($data['items'],auth()->id());
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
                 'message' => trans('message.success.cart.update'),
+                'data' => $data
             ], Response::HTTP_OK);
         } catch (Exception $e) {
             return response()->json([
@@ -144,6 +172,7 @@ class CartController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
+
 
     /**
      * @OA\Delete(
@@ -208,6 +237,87 @@ class CartController extends Controller
             $this->cartRepository->deleteBy([['user_id', '=', auth()->id()], ['product_id', 'in', $request->product_ids]]);
 
             return response()->json(['message' => trans('message.success.cart.delete')], Response::HTTP_OK);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => Constant::FALSE_CODE,
+                'message' => $e->getMessage(),
+                'data' => [],
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+    /**
+     * @OA\Delete(
+     *     path="/api/app/cart/delete/{id}",
+     *     summary="Xóa sản phẩm khỏi giỏ hàng",
+     *     description="Xóa một sản phẩm khỏi giỏ hàng của người dùng đã đăng nhập.",
+     *     tags={"APP Cart"},
+     *     security={{ "bearerAuth":{} }},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID của sản phẩm cần xóa",
+     *         @OA\Schema(
+     *             type="integer",
+     *             example=1
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Xóa sản phẩm thành công",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Xóa sản phẩm thành công."),
+     *             @OA\Property(property="deleted_count", type="integer", example=1)
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Dữ liệu không hợp lệ",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Chưa đăng nhập",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+     *         )
+     *     )
+     * )
+     */
+
+    public function destroy($id): JsonResponse
+    {
+        try {
+            // Kiểm tra xem sản phẩm có tồn tại trong giỏ hàng của người dùng không
+            $product = $this->cartRepository->findAllBy([
+                ['user_id', '=', auth()->id()],
+                ['product_id', '=', $id]
+            ]);
+
+            // Nếu không tìm thấy sản phẩm trong giỏ hàng, trả về lỗi
+            if ($product->isEmpty()) {
+                return response()->json([
+                    'status' => Constant::FALSE_CODE,
+                    'message' => 'Sản phẩm không tồn tại trong giỏ hàng.',
+                ], Response::HTTP_NOT_FOUND);
+            }
+            // Xóa sản phẩm theo id và user_id hiện tại
+            $this->cartRepository->deleteBy([
+                ['user_id', '=', auth()->id()],
+                ['product_id', '=', $id]
+            ]);
+
+            return response()->json([
+                'message' => trans('message.success.cart.delete'),
+                'id' => $product
+            ], Response::HTTP_OK);
         } catch (Exception $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,

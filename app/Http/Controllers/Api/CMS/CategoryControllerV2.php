@@ -37,19 +37,87 @@ class CategoryControllerV2 extends Controller
     /**
      * @OA\Get(
      *     path="/api/cms/categories",
-     *     security={{"bearerAuth":{}}},
      *     tags={"CMS Categories"},
-     *     summary="Lấy ra danh sách danh mục",
+     *     security={{"bearerAuth":{}}},
+     *     summary="Lấy ra danh sách danh muc",
+     *          @OA\Parameter(
+     *           in="query",
+     *           name="page",
+     *           required=false,
+     *           description="Trang",
+     *           @OA\Schema(
+     *             type="integer",
+     *             example=1,
+     *           )
+     *      ),
+     *      @OA\Parameter(
+     *           in="query",
+     *           name="perpage",
+     *           required=false,
+     *           description="Per Page",
+     *           @OA\Schema(
+     *             type="integer",
+     *             example=10,
+     *           )
+     *      ),
+     *     @OA\Parameter(
+     *           in="query",
+     *           name="searchFields[]",
+     *           required=false,
+     *           description="List of fields to search. Example: ['name_booking']",
+     *          @OA\Schema(
+     *             type="array",
+     *             @OA\Items(
+     *               type="string",
+     *               example="name_booking"
+     *              )
+     *           ),
+     *      ),
+     *     @OA\Parameter(
+     *            in="query",
+     *            name="search",
+     *            required=false,
+     *            description="Content search. Example: 'Thiên'",
+     *            @OA\Schema(
+     *              type="string",
+     *              example="Thiên",
+     *            ),
+     *       ),
+     *     @OA\Parameter(
+     *             in="query",
+     *             name="filter",
+     *             required=false,
+     *             description="Filter criteria in JSON format. Example: {""created_at_RANGE"": [""2024-01-20"", ""2024-01-28""]}",
+     *             @OA\Schema(
+     *              type="string",
+     *              example="{""created_at_RANGE"": [""2024-01-20"", ""2024-01-28""]}",
+     *            ),
+     *        ),
+     *     @OA\Parameter(
+     *              in="query",
+     *              name="sort[]",
+     *              required=false,
+     *              description="Sort criteria in array format. Use '-' for descending order and '+' for ascending order. Example: ['-created_at']",
+     *              @OA\Schema(
+     *             type="array",
+     *             @OA\Items(
+     *               type="string",
+     *               example="-created_at"
+     *              )
+     *           ),
+     *         ),
      *     @OA\Response(
      *         response=200,
-     *         description="A list of products",
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Category"))
-     *     )
+     *         description="Success",
+     *             @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Success."),
+     *          )
+     *     ),
      * )
      */
     public function index(): JsonResponse
     {
-        $categories = $this->categoryRepository->all();
+        $categories = $this->categoryRepository->listCategory();
         return response()->json([
             'status' => Constant::SUCCESS_CODE,
             'message' => 'Danh sách các danh mục',
@@ -59,10 +127,10 @@ class CategoryControllerV2 extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/cms/categories/{id}/products",
+     *     path="/api/cms/categories/{id}/",
      *     tags={"CMS Categories"},
      *     security={{"bearerAuth":{}}},
-     *     summary="Lấy danh sách sản phẩm dựa vào Danh mục",
+     *     summary="Lấy chi tiet Danh mục",
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -77,14 +145,14 @@ class CategoryControllerV2 extends Controller
      *     )
      * )
      */
-    public function getProductsByCategory($categoryId): JsonResponse
+    public function getCategoryById($categoryId): JsonResponse
     {
         try {
-            $products = $this->categoryService->getProductsByCategory($categoryId);
+            $category = $this->categoryRepository->find($categoryId);
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => 'Danh sách các sản phẩm của danh mục',
-                'data' => $products
+                'message' => 'Chi tiết danh mục',
+                'data' => $category
             ], Response::HTTP_OK);
         } catch (Exception $e) {
             return response()->json([
@@ -116,6 +184,7 @@ class CategoryControllerV2 extends Controller
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
+                'slug' => 'nullable',
             ]);
 
             $category = $this->categoryService->createCategory($request->all());
@@ -150,8 +219,9 @@ class CategoryControllerV2 extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name","price","category_id"},
+     *             required={"name","slug","category_id"},
      *             @OA\Property(property="name", type="string", example=".."),
+     *              @OA\Property(property="slug", type="string", example="do-an"),
      *         )
      *     ),
      *     @OA\Response(
@@ -170,6 +240,7 @@ class CategoryControllerV2 extends Controller
         try {
             $request->validate([
                 'name' => 'required|string',
+                'slug' => 'required|string'
             ]);
 
             $category = $this->categoryService->updateCategory($categoryId, $request->all());

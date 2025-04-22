@@ -13,6 +13,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\Response;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+
 
 /**
  * @OA\Tag(
@@ -182,7 +184,7 @@ class ProductControllerV2 extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/cms/product/create",
+     *     path="/api/cms/products/create",
      *     tags={"CMS Products"},
      *     summary="Tạo sản phẩm mới",
      *     security={{"bearerAuth":{}}},
@@ -203,17 +205,30 @@ class ProductControllerV2 extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
-            $request->validate([
+            $data = $request->validate([
                 'name' => 'required|string|max:255',
+                'description' => 'nullable|string|max:2000',
                 'price' => 'required|numeric|min:0',
                 'category_id' => 'required|integer|min:0|exists:categories,id',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ]);
+            $file = $request->file('image');
+
+            $uploadedFile = cloudinary()->upload($file->getRealPath(), [
+                'folder' => 'products'
+            ]);
+
+            $url = $uploadedFile->getSecurePath();
+            $public_id = $uploadedFile->getPublicId();
+
+            $data['image'] = $public_id;
+            $data['image_url'] = $url;
+
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
                 'message' => trans('message.success.product.create'),
-                'data' => $this->productService->createProduct($request->all())
+                'data' => $this->productRepository->createOrUpdate($data),
             ], Response::HTTP_CREATED);
         } catch (Exception $e) {
             return response()->json([
@@ -242,7 +257,8 @@ class ProductControllerV2 extends Controller
      *             @OA\Schema(
      *                 required={"_method", "name", "price", "category_id"},
      *                 @OA\Property(property="_method", type="string", example="PUT"),
-     *                 @OA\Property(property="name", type="string", example="Bánh ngọt"),
+     *                 @OA\Property(property="name", type="string", example="Một vài thông tin về "),
+     *                 @OA\Property(property="description", type="string", example="..."),
      *                 @OA\Property(property="price", type="number", format="float", example=40000),
      *                 @OA\Property(property="category_id", type="integer", example=1),
      *                 @OA\Property(property="image", type="string", format="binary")
@@ -258,9 +274,10 @@ class ProductControllerV2 extends Controller
         try {
             $request->validate([
                 'name' => 'required|string',
+                'description' => 'nullable|string|max:1000',
                 'price' => 'required|numeric',
                 'category_id' => 'required|integer|exists:categories,id',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ]);
             $product = $this->productService->updateProduct($id, $request->all());
 

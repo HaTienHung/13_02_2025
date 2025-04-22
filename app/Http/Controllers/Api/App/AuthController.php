@@ -168,6 +168,7 @@ class AuthController extends Controller
      *                 required={"name", "email", "phone_number", "password", "password_confirmation"},
      *                 @OA\Property(property="name", type="string", example="Nguyen Van A"),
      *                 @OA\Property(property="email", type="string", format="email", example="nguyenvana@example.com"),
+     *                 @OA\Property(property="address", type="string", format="email", example="Ha Noi"),
      *                 @OA\Property(property="phone_number", type="string", example="0387768880"),
      *                 @OA\Property(property="password", type="string", format="password", example="password123"),
      *                 @OA\Property(property="password_confirmation", type="string", format="password", example="password123")
@@ -183,6 +184,7 @@ class AuthController extends Controller
      *             @OA\Property(property="data", type="object",
      *                 @OA\Property(property="name", type="string", example="Nguyen Van A"),
      *                 @OA\Property(property="email", type="string", example="nguyenvana@example.com"),
+     *                 @OA\Property(property="address", type="string", example="Ha Noi"),
      *                 @OA\Property(property="phone_number", type="string", example="0387768880")
      *             )
      *         )
@@ -198,6 +200,7 @@ class AuthController extends Controller
             $data = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|unique:users,email',
+                'address' => 'required|string',
                 'phone_number' => 'required|string|max:15|unique:users,phone_number',
                 'password' => 'required|string|min:8|confirmed',
             ]);

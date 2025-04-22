@@ -2,6 +2,8 @@
 
 namespace App\Traits;
 
+
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,9 +16,21 @@ trait FileUploadTrait
      * @param string $folder
      * @return string|null
      */
-    public function uploadFile(UploadedFile $file, string $folder): ?string
+//    public function uploadFile(UploadedFile $file, string $folder): ?string
+//    {
+//        return $file->store($folder, 'public');
+//    }
+    public function uploadFile($file, $folder = 'products')
     {
-        return $file->store($folder, 'public');
+        if (!$file) {
+            throw new \Exception("No file provided or file is null.");
+        }
+
+        // Upload file lên Cloudinary thông qua Storage
+        $path = Storage::disk('cloudinary')->putFile($folder, $file);
+
+        // Trả về URL đầy đủ từ Cloudinary
+        return Storage::disk('cloudinary')->url($path);
     }
 
     /**
@@ -27,8 +41,9 @@ trait FileUploadTrait
      */
     public function deleteFile(?string $filePath): void
     {
-        if ($filePath && Storage::disk('public')->exists($filePath)) {
-            Storage::disk('public')->delete($filePath);
+        if ($filePath) {
+            // Xoá theo public_id
+            Cloudinary::destroy($filePath);
         }
     }
 }

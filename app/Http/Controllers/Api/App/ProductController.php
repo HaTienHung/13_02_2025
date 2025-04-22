@@ -133,10 +133,40 @@ class ProductController extends Controller
             ],Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
     /**
      * @OA\Get(
-     *     path="/api/products/{id}",
+     *     path="/api",
+     *     tags={"APP Products"},
+     *     summary="Lấy ra danh sách sản phẩm mới nhất",
+
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *             @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Success."),
+     *          )
+     *     ),
+     * )
+     */
+    public function getLastestProducts(Request $request): JsonResponse
+    {
+        try{
+            $listProduct = $this->productRepository->getLastestProducts();
+            return response()->json([
+                'status' => Constant::SUCCESS_CODE,
+                'message' => 'Danh sách sản phẩm:',
+                'data' => $listProduct
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status'=>Constant::FALSE_CODE,
+                'message' => $th->getMessage()
+            ],Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+    /**
+     * @OA\Get(
+     *     path="/api/products/id/{id}",
      *     tags={"APP Products"},
      *     summary="Lấy thông tin chi tiết sản phẩm",
      *     @OA\Parameter(
@@ -157,7 +187,47 @@ class ProductController extends Controller
     public function show($id): JsonResponse
     {
         try {
-            $product = $this->productService->getProductById($id);
+            $product = $this->productRepository->findBy('id',$id);
+            return response()->json([
+                'status' => Constant::SUCCESS_CODE,
+                'message' => 'Thông tin sản phẩm',
+                'product' => $product,
+            ], Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'status' => Constant::FALSE_CODE,
+                'message' => trans('message.errors.not_found'),
+            ], Response::HTTP_NOT_FOUND);
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => Constant::FALSE_CODE,
+                'message' => $e->getMessage(),
+            ], Response::HTTP_NOT_FOUND);
+        }
+    }
+    /**
+     * @OA\Get(
+     *     path="/api/products/{slug}",
+     *     tags={"APP Products"},
+     *     summary="Lấy thông tin chi tiết sản phẩm",
+     *     @OA\Parameter(
+     *         name="slug",
+     *         in="path",
+     *         description="Slug của sản phẩm",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="A product detail",
+     *         @OA\JsonContent(ref="#/components/schemas/Product")
+     *     )
+     * )
+     */
+    public function showBySlug($slug): JsonResponse
+    {
+        try {
+            $product = $this->productRepository->findBy('slug',$slug);
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
                 'message' => 'Thông tin sản phẩm',

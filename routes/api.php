@@ -17,11 +17,13 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 //Products
+Route::get('/', [ProductController::class, 'getLastestProducts'])->name('products.latest');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/products/{slug}', [ProductController::class, 'showBySlug'])->name('products.show.slug');
+Route::get('/products/id/{id}', [ProductController::class, 'show'])->name('products.show.id');
 //Categories
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
-Route::get('/categories/{id}/products', [CategoryController::class, 'getProductsByCategory'])->name('categories.products');
+Route::get('/categories/{slug}', [CategoryController::class, 'getProductsByCategorySlug'])->name('categories.slug.products');
 
 Route::prefix('app')->group(function () {
     Route::group(['middleware' => ['auth:sanctum', 'role:user']], function () {

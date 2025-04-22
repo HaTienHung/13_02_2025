@@ -2,7 +2,9 @@
 
 namespace App\Repositories\Category;
 
+use App\Enums\Constant;
 use App\Models\Category;
+use App\Models\Product;
 use App\Repositories\BaseRepository;
 
 class CategoryRepository extends BaseRepository implements CategoryInterface
@@ -10,6 +12,13 @@ class CategoryRepository extends BaseRepository implements CategoryInterface
     public function __construct(Category $category)
     {
         parent::__construct($category);
+    }
+    public function listCategory($perpage = Constant::PER_PAGE)
+    {
+        $categories = $this->model->search(request('searchFields'), request('search'))
+            ->filter(request('filter'))
+            ->sort(request('sort'))->paginate($perpage);
+        return $categories;
     }
     // public function getProductsByCategory($categoryId)
     // {

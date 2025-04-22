@@ -83,15 +83,83 @@ class InventoryController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/api/cms/inventories/show",
+     *     path="/api/cms/inventories",
      *     tags={"CMS Inventories"},
-     *     summary="Lấy báo cáo tồn kho",
      *     security={{"bearerAuth":{}}},
+     *     summary="Lấy báo cáo tồn kho",
+     *          @OA\Parameter(
+     *           in="query",
+     *           name="page",
+     *           required=false,
+     *           description="Trang",
+     *           @OA\Schema(
+     *             type="integer",
+     *             example=1,
+     *           )
+     *      ),
+     *      @OA\Parameter(
+     *           in="query",
+     *           name="perpage",
+     *           required=false,
+     *           description="Per Page",
+     *           @OA\Schema(
+     *             type="integer",
+     *             example=10,
+     *           )
+     *      ),
+     *     @OA\Parameter(
+     *           in="query",
+     *           name="searchFields[]",
+     *           required=false,
+     *           description="List of fields to search. Example: ['name_booking']",
+     *          @OA\Schema(
+     *             type="array",
+     *             @OA\Items(
+     *               type="string",
+     *               example="name_booking"
+     *              )
+     *           ),
+     *      ),
+     *     @OA\Parameter(
+     *            in="query",
+     *            name="search",
+     *            required=false,
+     *            description="Content search. Example: 'Thiên'",
+     *            @OA\Schema(
+     *              type="string",
+     *              example="Thiên",
+     *            ),
+     *       ),
+     *     @OA\Parameter(
+     *             in="query",
+     *             name="filter",
+     *             required=false,
+     *             description="Filter criteria in JSON format. Example: {""created_at_RANGE"": [""2024-01-20"", ""2024-01-28""]}",
+     *             @OA\Schema(
+     *              type="string",
+     *              example="{""created_at_RANGE"": [""2024-01-20"", ""2024-01-28""]}",
+     *            ),
+     *        ),
+     *     @OA\Parameter(
+     *              in="query",
+     *              name="sort[]",
+     *              required=false,
+     *              description="Sort criteria in array format. Use '-' for descending order and '+' for ascending order. Example: ['-created_at']",
+     *              @OA\Schema(
+     *             type="array",
+     *             @OA\Items(
+     *               type="string",
+     *               example="-created_at"
+     *              )
+     *           ),
+     *         ),
      *     @OA\Response(
      *         response=200,
-     *         description="Stock Report",
-     *         @OA\JsonContent(ref="#/components/schemas/Inventory")
-     *     )
+     *         description="Success",
+     *             @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Success."),
+     *          )
+     *     ),
      * )
      */
     public function getStockReport(): JsonResponse

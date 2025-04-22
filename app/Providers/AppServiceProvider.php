@@ -11,6 +11,8 @@ use App\Repositories\Cart\CartInterface;
 use App\Repositories\Cart\CartRepository;
 use App\Repositories\Category\CategoryInterface;
 use App\Repositories\Category\CategoryRepository;
+use App\Repositories\Dashboard\DashboardInterface;
+use App\Repositories\Dashboard\DashboardRepository;
 use App\Repositories\Inventory\InventoryInterface;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Repositories\Order\OrderInterface;
@@ -24,6 +26,7 @@ use App\Repositories\User\UserRepository;
 use Illuminate\Container\Container;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -42,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
             CategoryInterface::class => CategoryRepository::class,
             InventoryInterface::class => InventoryRepository::class,
             CartInterface::class => CartRepository::class,
+            DashboardInterface::class => DashboardRepository::class,
         ];
 
         foreach ($repositories as $interface => $repository) {

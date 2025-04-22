@@ -6,6 +6,7 @@ use App\Enums\Constant;
 use App\Exports\OrderV2Export;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
+use App\Models\Order;
 use App\Models\User;
 use App\Repositories\Order\OrderRepository;
 use App\Services\Order\OrderService;
@@ -107,7 +108,7 @@ class OrderControllerV2 extends Controller
     public function index(): JsonResponse
     {
         $orders = $this->orderRepository->listOrder();
-        return response()->json(['message' => 'Danh sách đơn hàng:', 'orders' => OrderResource::collection($orders)], Response::HTTP_OK);
+        return response()->json(['message' => 'Danh sách đơn hàng:', 'data' => OrderResource::collection($orders)], Response::HTTP_OK);
     }
 
     /**
@@ -289,17 +290,7 @@ class OrderControllerV2 extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"items", "status"},
-     *             @OA\Property(
-     *                 property="items",
-     *                 type="array",
-     *                 description="Danh sách sản phẩm trong đơn hàng",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     @OA\Property(property="product_id", type="integer", example=5, description="ID sản phẩm"),
-     *                     @OA\Property(property="quantity", type="integer", example=2, description="Số lượng sản phẩm")
-     *                 )
-     *             ),
+     *             required={ "status"},
      *             @OA\Property(
      *                 property="status",
      *                 type="string",
@@ -340,12 +331,12 @@ class OrderControllerV2 extends Controller
             // Validate các trường thông tin đầu vào
             $request->validate([
                 'status' => 'required|in:pending,completed,cancelled',
-                'items' => 'required|array', // Đảm bảo items là mảng
-                'items.*.product_id' => 'required|integer|min:1|exists:products,id', // Kiểm tra sản phẩm tồn tại trong bảng products
-                'items.*.quantity' => 'required|integer|min:1', // Kiểm tra số lượng hợp lệ cho từng sản phẩm
+//                'items' => 'required|array', // Đảm bảo items là mảng
+//                'items.*.product_id' => 'required|integer|min:1|exists:products,id', // Kiểm tra sản phẩm tồn tại trong bảng products
+//                'items.*.quantity' => 'required|integer|min:1', // Kiểm tra số lượng hợp lệ cho từng sản phẩm
             ]);
 
-            $order = $this->orderService->updateOrder(auth()->id(), $id, $request->items, $request->status);
+            $order = $this->orderRepository->createOrUpdate($request->all(),['id'=>$id]);
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,

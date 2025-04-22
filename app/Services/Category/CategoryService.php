@@ -2,7 +2,9 @@
 
 namespace App\Services\Category;
 
+use App\Enums\Constant;
 use App\Repositories\Category\CategoryInterface;
+use App\Repositories\Product\ProductInterface;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,10 +12,12 @@ use Symfony\Component\HttpFoundation\Response;
 class CategoryService
 {
     protected CategoryInterface $categoryRepository;
+    protected ProductInterface $productRepository;
 
-    public function __construct(CategoryInterface $categoryRepository)
+    public function __construct(CategoryInterface $categoryRepository , ProductInterface $productRepository)
     {
         $this->categoryRepository = $categoryRepository;
+        $this->productRepository = $productRepository;
     }
 
     public function updateCategory($id, array $data)
@@ -66,13 +70,19 @@ class CategoryService
     public function getProductsByCategory($categoryId)
     {
         try {
-            $category = $this->categoryRepository->findById($categoryId, ['products']);
-//
-//            if ($category && $category->products->isEmpty()) {
-//                throw new Exception("Danh mục này không có sản phẩm nào !!!", Response::HTTP_NOT_FOUND);
-//            }
+            return  $this->categoryRepository->findById($categoryId, ['products']);
 
-            return $category;
+        } catch (ModelNotFoundException $e) {
+            throw new Exception(trans('message.errors.not_found'), Response::HTTP_NOT_FOUND);
+        }
+    }
+    public function getProductsByCategorySlug($slug , $perPage = Constant::PER_PAGE)
+    {
+        try {
+
+//            return $this->categoryRepository->findAllBy(['slug'=>$slug],['products']);
+            $category = $this->categoryRepository->findBy('slug',$slug);
+            return $this->productRepository->paginateByCategoryId($category->id, $perPage);
         } catch (ModelNotFoundException $e) {
             throw new Exception(trans('message.errors.not_found'), Response::HTTP_NOT_FOUND);
         }
