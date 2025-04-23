@@ -14,7 +14,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 
 # Sao chép toàn bộ project Laravel vào container
-#COPY . .
+COPY . .
 
 # Cài đặt các package Laravel bằng Composer
 RUN composer install --no-dev --optimize-autoloader
