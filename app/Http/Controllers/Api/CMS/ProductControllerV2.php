@@ -11,9 +11,10 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\Response;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+
 
 
 /**
@@ -214,16 +215,14 @@ class ProductControllerV2 extends Controller
             ]);
             $file = $request->file('image');
 
-            $uploadedFile = cloudinary()->upload($file->getRealPath(), [
-                'folder' => 'products'
-            ]);
+            $result = cloudinary()
+                ->uploadApi()
+                ->upload($file->getRealPath(), [
+                    'folder' => 'products',
+                ]);
 
-            $url = $uploadedFile->getSecurePath();
-            $public_id = $uploadedFile->getPublicId();
-
-            $data['image'] = $public_id;
-            $data['image_url'] = $url;
-
+            $data['image']      = $result['public_id'];
+            $data['image_url']  = $result['secure_url'];
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
@@ -274,13 +273,38 @@ class ProductControllerV2 extends Controller
         try {
             $request->validate([
                 'name' => 'required|string',
-                'description' => 'nullable|string|max:1000',
+                'description' => 'nullable|string|max:2000',
                 'price' => 'required|numeric',
                 'category_id' => 'required|integer|exists:categories,id',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ]);
-            $product = $this->productService->updateProduct($id, $request->all());
 
+            $data = $request->all(); // lấy data trước
+
+            $product = $this->productRepository->find($id);
+
+// Nếu có ảnh mới thì upload và xoá ảnh cũ
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+
+                $uploadResult = cloudinary()
+                    ->uploadApi()
+                    ->upload($file->getRealPath(), [
+                        'folder' => 'products',
+                    ]);
+
+                // Xoá ảnh cũ trên Cloudinary nếu có
+                if ($product && $product->image) {
+                    cloudinary()->uploadApi()->destroy($product->image);
+                }
+
+                // Cập nhật lại giá trị ảnh
+                $data['image'] = $uploadResult['public_id'];
+                $data['image_url'] = $uploadResult['secure_url'];
+            }
+
+// Cập nhật sản phẩm
+            $this->productRepository->createOrUpdate($data, ['id'=>$id]);
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
                 'message' => trans('message.success.product.update'),
@@ -326,7 +350,10 @@ class ProductControllerV2 extends Controller
     public function destroy($id): JsonResponse
     {
         try {
-            $this->productService->deleteProduct($id);
+            $product = $this->productRepository->find($id);
+            //Xoa anh tren cloudinary
+            cloudinary()->uploadApi()->destroy($product->image);
+            $this->productRepository->delete($id);
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
                 'message' => trans('message.success.product.delete')

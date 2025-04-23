@@ -24,16 +24,16 @@ class Product extends Model
     use HasFactory;
     use FilterTrait;
 
-    protected $fillable = ['name', 'slug', 'price', 'description', 'category_id','image'];
+    protected $fillable = ['name', 'slug', 'price', 'description', 'category_id','image','image_url'];
 
 
-    protected $appends = ['image_url'];
-
-    public function getImageUrlAttribute()
-    {
-        // Kiểm tra xem có tồn tại URL từ Cloudinary không
-        return $this->image ? $this->image : null; // Trả về URL đã lưu trong cột 'image'
-    }
+//    protected $appends = ['image_url'];
+//
+//    public function getImageUrlAttribute()
+//    {
+//        // Kiểm tra xem có tồn tại URL từ Cloudinary không
+//        return $this->image ? $this->image : null; // Trả về URL đã lưu trong cột 'image'
+//    }
 
     public function category()
     {

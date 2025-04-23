@@ -37,11 +37,16 @@ class ProductService
 
         // Nếu có ảnh mới và sản phẩm đã có ảnh cũ -> Xoá ảnh cũ
         if (isset($data['image']) && $product->image) {
-            $this->deleteFile($product->image);
+            cloudinary()->uploadApi()->destroy($product->image);
         }
 
         // Nếu có ảnh mới, upload ảnh và cập nhật đường dẫn
         if (isset($data['image'])) {
+            $result = cloudinary()
+                ->uploadApi()
+                ->upload($file->getRealPath(), [
+                    'folder' => 'products',
+                ]);
             $data['image'] = $this->uploadFile($data['image']);
         }
         return $this->productRepository->update($id, $data);
