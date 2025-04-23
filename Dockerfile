@@ -23,4 +23,6 @@ RUN composer install --no-dev --optimize-autoloader
 EXPOSE 9000
 
 # Chạy PHP-FPM khi container khởi động, dùng cổng từ biến môi trường PORT nếu có, không có dùng cổng 8000
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=${PORT:-8000}"]
+CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
+
+
