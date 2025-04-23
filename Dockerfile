@@ -19,10 +19,8 @@ COPY . .
 # Cài đặt các package Laravel bằng Composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Expose cổng 9000 để container PHP-FPM có thể nhận request từ Nginx
+# Expose cổng 9000 (hoặc cổng mà bạn muốn, nhưng Railway sẽ override cổng đó)
 EXPOSE 9000
 
-# Chạy PHP-FPM khi container khởi động
-CMD ["php-fpm"]
-
-
+# Chạy PHP-FPM khi container khởi động, dùng cổng từ biến môi trường PORT nếu có, không có dùng cổng 8000
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=${PORT:-8000}"]
