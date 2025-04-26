@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\Cms\OrderControllerV2;
+use App\Http\Controllers\Api\CMS\OrderControllerV2;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('orders')->group(function () {

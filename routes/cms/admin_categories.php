@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\Cms\CategoryControllerV2;
+use App\Http\Controllers\Api\CMS\CategoryControllerV2;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('categories')->group(function () {

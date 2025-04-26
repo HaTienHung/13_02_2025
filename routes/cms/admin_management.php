@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\Cms\UserControllerV2;
+use App\Http\Controllers\Api\CMS\UserControllerV2;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('users')->group(function () {

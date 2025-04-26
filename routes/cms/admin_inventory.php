@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\Cms\InventoryController;
+use App\Http\Controllers\Api\CMS\InventoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('inventories')->group(function () {
