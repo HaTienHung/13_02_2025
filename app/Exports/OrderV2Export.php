@@ -47,10 +47,13 @@ class OrderV2Export implements FromCollection, WithMapping, WithHeadings, WithCo
         return [
             'STT',
             'Mã đơn hàng',
-            'Mã khách hàng',
+            'Tên khách hàng',
+            'SĐT',
+            'Địa chỉ',
+            'Email',
             'Sản phẩm trong đơn hàng',
-            'Tổng tiền',
             'Trạng thái',
+            'Tổng tiền',
         ];
     }
 
@@ -62,11 +65,14 @@ class OrderV2Export implements FromCollection, WithMapping, WithHeadings, WithCo
     {
         return [
             'A' => 5,
-            'B' => 10,
-            'C' => 10,
-            'D' => 40,
-            'E' => 20,
-            'F' => 10,
+            'B' => 20,
+            'C' => 25,
+            'D' => 15,
+            'E' => 50,
+            'F' => 30,
+            'G' => 50,
+            'H' => 20,
+            'J' => 20,
         ];
     }
 
@@ -80,14 +86,17 @@ class OrderV2Export implements FromCollection, WithMapping, WithHeadings, WithCo
         $total = count($this->responses) + 1;
         $products = collect($row->orderItems)->map(function ($item) {
             return "{$item->product->name} (\${$item->price}) (x{$item->quantity})";
-        })->implode(', ');
+        })->implode("\n");
         return [
             $total - (++$this->i),
             $row->id,
-            $row->user_id,
+            $row->user->name,
+            $row->user->phone_number,
+            $row->user->address,
+            $row->user->email,
             $products,
-            $row->total_price,
             $row->status,
+            $row->total_price,
         ];
     }
 }
