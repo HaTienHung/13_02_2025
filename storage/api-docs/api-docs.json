@@ -6,6 +6,20 @@
     },
     "paths": {
         "/api/doc": {},
+        "/sanctum/csrf-cookie": {
+            "get": {
+                "tags": [
+                    "APP Accounts"
+                ],
+                "summary": "Lấy CSRF cookie để bảo vệ CSRF token",
+                "operationId": "getCsrfCookie",
+                "responses": {
+                    "200": {
+                        "description": "CSRF cookie được thiết lập"
+                    }
+                }
+            }
+        },
         "/api/app/users/login": {
             "post": {
                 "tags": [
@@ -2051,6 +2065,38 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Inventory"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cms/inventories/stock-report/export-excel": {
+            "get": {
+                "tags": [
+                    "CMS Inventories"
+                ],
+                "summary": "Xuất Excel",
+                "operationId": "stock-report/export-excel",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Success."
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }

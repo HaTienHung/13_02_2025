@@ -14,8 +14,7 @@ class InventoryService
     public function __construct(
         InventoryRepository $inventoryRepository,
         ProductRepository   $productRepository
-    )
-    {
+    ) {
         $this->inventoryRepository = $inventoryRepository;
         $this->productRepository = $productRepository;
     }
@@ -41,6 +40,23 @@ class InventoryService
 
     public function getStockReport()
     {
+        // Lấy tất cả sản phẩm mà không phân trang
+        $products = $this->productRepository->all();
+
+        // Tiến hành transform lại dữ liệu
+        $items = collect($products)->transform(function ($product) {
+            return [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'stock' => $this->getStock($product->id)
+            ];
+        });
+
+        return $items;
+    }
+
+    public function getStockReportWithPaginate()
+    {
         $products = $this->productRepository->listProduct();
 
         $products->getCollection()->transform(function ($product) {
@@ -62,5 +78,4 @@ class InventoryService
         $exported = $this->inventoryRepository->getEXportProduct($productId);
         return $imported - $exported;
     }
-
 }

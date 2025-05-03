@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\CMS;
 
 use App\Enums\Constant;
+use App\Exports\StockReportExport;
 use App\Http\Controllers\Controller;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Services\Inventory\InventoryService;
@@ -10,6 +11,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 /**
  * @OA\Tag(
@@ -71,7 +73,6 @@ class InventoryController extends Controller
                 'message' => trans('message.success.inventory.create'),
                 'data' => $inventoryTransaction
             ], Response::HTTP_CREATED);
-
         } catch (Exception $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
@@ -164,7 +165,7 @@ class InventoryController extends Controller
      */
     public function getStockReport(): JsonResponse
     {
-        $stockReport = $this->inventoryService->getStockReport();
+        $stockReport = $this->inventoryService->getStockReportWithPaginate();
         return response()->json([
             'status' => Constant::SUCCESS_CODE,
             'message' => 'Danh sách tồn kho của sản phẩm',
@@ -217,4 +218,75 @@ class InventoryController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
+    /**
+     * @OA\Get (
+     *     path="/api/cms/inventories/stock-report/export-excel",
+     *     tags={"CMS Inventories"},
+     *     summary="Xuất Excel",
+     *     security={{"bearerAuth":{}}},
+     *     operationId="stock-report/export-excel",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *             @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Success."),
+     *          )
+     *     ),
+     * )
+     */
+    public function exportExcelStockReport()
+    {
+        try {
+            $stockReport = $this->inventoryService->getStockReport();
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => Constant::FALSE_CODE,
+                'message' => $th->getMessage(),
+                'data' => []
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        return Excel::download(
+            new StockReportExport($stockReport),
+            'StockReport' . str_replace('/', '-', date('Y/m/d')) . '.xlsx'
+        );
+    }
+    /**
+     * @OA\Get (
+     *     path="/api/cms/inventories/transactions/export-excel",
+     *     tags={"CMS Inventories"},
+     *     summary="Xuất Excel",
+     *     security={{"bearerAuth":{}}},
+     *     operationId="transactions/export-excel",
+     *        @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID của sản phẩm",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *             @OA\JsonContent(
+     *              @OA\Property(property="message", type="string", example="Success."),
+     *          )
+     *     ),
+     * )
+     */
+    // public function exportExcelTransactions($productId)
+    // {
+    //     try {
+    //         $inventoryRecords = $this->inventoryRepository->findAllBy(['product_id' => $productId]);
+    //     } catch (\Throwable $th) {
+    //         return response()->json([
+    //             'status' => Constant::FALSE_CODE,
+    //             'message' => $th->getMessage(),
+    //             'data' => []
+    //         ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    //     }
+    //     return Excel::download(
+    //         new TransactionsExport($inventoryRecords),
+    //         'TransactionsReport' . str_replace('/', '-', date('Y/m/d')) . '.xlsx'
+    //     );
+    // }
 }
