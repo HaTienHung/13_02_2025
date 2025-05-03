@@ -1,37 +1,39 @@
 # 🛒 My E-commerce Project
 
-A full-stack e-commerce web application with user roles, cart, product management, and inventory tracking.
+Ứng dụng web thương mại điện tử full-stack với các tính năng quản lý người dùng, giỏ hàng, sản phẩm và theo dõi tồn kho.
 
 ---
 
 ## 🔗 Demo
 
--   **Frontend**: [https://my-new-project-three-phi.vercel.app](https://my-new-project-three-phi.vercel.app)
--   **API Docs (Swagger)**: [https://13022025-production.up.railway.app/docs](https://13022025-production.up.railway.app/docs)
+-   **Frontend**: [My E-commerce Project - Frontend](https://my-new-project-three-phi.vercel.app) (Trang sản phẩm)
+-   **Frontend**: [My E-commerce Project - Frontend](https://my-new-project-three-phi.vercel.app/cms/dashboard) (Trang quản lí)
+-   **API Docs (Swagger)**: [Swagger API Docs](https://13022025-production.up.railway.app/docs)
 -   👉 Mở [Swagger Editor](https://editor.swagger.io), chọn "File > Import URL", rồi dán link JSON vào để test API.
 
 ---
 
 ## 👤 Tài khoản demo
 
-| Role  | Email             | Mật khẩu |
-| ----- | ----------------- | -------- |
-| Admin | admin01@gmail.com | 12345678 |
-| User  | user01@gmail.com  | 12345678 |
+| **Role**  | **Email**         | **Mật khẩu** |
+| --------- | ----------------- | ------------ |
+| **Admin** | admin01@gmail.com | 12345678     |
+| **User**  | user01@gmail.com  | 12345678     |
 
 ---
 
 ## 🧩 Tính năng chính
 
--   ✅ Đăng nhập / Đăng ký
--   ✅ Phân quyền người dùng: **Admin / User**
--   ✅ Giỏ hàng (thêm, xoá, sửa số lượng)
--   ✅ Quản lý:
-    -   Sản phẩm
-    -   Đơn hàng
-    -   Tồn kho (inventory)
--   ✅ Tìm kiếm, phân trang và lọc sản phẩm
--   ✅ Swagger API để test trực tiếp
+-   ✅ **Đăng nhập / Đăng ký**
+-   ✅ **Phân quyền người dùng**: **Admin / User**
+-   ✅ **Giỏ hàng**: Thêm, xoá, và sửa số lượng sản phẩm trong giỏ.
+-   ✅ **Đặt hàng**: Người dùng đặt hàng từ giỏ hàng.
+-   ✅ **Quản lý**:
+    -   **Sản phẩm**
+    -   **Đơn hàng**
+    -   **Tồn kho** (inventory tracking)
+-   ✅ **Tìm kiếm**, **Phân trang**, và **Lọc sản phẩm**
+-   ✅ **Swagger API**: Được tích hợp để test API trực tiếp
 
 ---
 
@@ -40,21 +42,22 @@ A full-stack e-commerce web application with user roles, cart, product managemen
 -   **Frontend**: Next.js, Redux, TailwindCSS
 -   **Backend**: Laravel 11, MySQL, REST API
 -   **Authentication**: JWT
--   **Deployment**: Vercel (FE), Railway (BE)
+-   **Deployment**: Vercel (Frontend), Railway (Backend)
 -   **API Documentation**: Swagger (OpenAPI 3)
 
 ---
 
 ## 📦 Kiến trúc hệ thống
 
--   Tách riêng **FE** và **BE**
--   BE theo kiến trúc: `Repository Pattern` + `Service Layer`
--   FE sử dụng `App Router` + `SSR + CSR`
--   Có phân quyền qua middleware
--   Giỏ hàng lưu theo user, convert thành đơn hàng khi đặt
+-   **Frontend** và **Backend** được tách biệt rõ ràng
+-   Backend sử dụng kiến trúc **Repository Pattern** kết hợp **Service Layer**
+-   Frontend sử dụng **App Router** với **SSR (Server Side Rendering)** và **CSR (Client Side Rendering)**
+-   Có **middleware** cho việc phân quyền người dùng
+-   **Giỏ hàng** lưu trữ theo user, và được **convert thành đơn hàng** khi người dùng đặt hàng
 
 ---
 
 ## 📎 Ghi chú
 
-> Ứng dụng có thể hơi chậm vì phải cold start , mong anh/chị thông cảm .
+> Ứng dụng có thể hơi chậm do phải cold start. Mong anh/chị thông cảm.
+> """
