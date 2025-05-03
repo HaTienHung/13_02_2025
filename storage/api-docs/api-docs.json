@@ -6,20 +6,6 @@
     },
     "paths": {
         "/api/doc": {},
-        "/sanctum/csrf-cookie": {
-            "get": {
-                "tags": [
-                    "APP Accounts"
-                ],
-                "summary": "Lấy CSRF cookie để bảo vệ CSRF token",
-                "operationId": "getCsrfCookie",
-                "responses": {
-                    "200": {
-                        "description": "CSRF cookie được thiết lập"
-                    }
-                }
-            }
-        },
         "/api/app/users/login": {
             "post": {
                 "tags": [
@@ -1312,6 +1298,17 @@
                 ],
                 "summary": "Xem thông tin hồ sơ người dùng đang đăng nhập",
                 "operationId": "27c1831627871454cb26c50cc1f5be42",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID người dùng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Success",
@@ -1344,6 +1341,17 @@
                 ],
                 "summary": "Cập nhật tài khoản",
                 "operationId": "3f93419fc58f14585f6dd63bd90b5ba6",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID người dùng",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -3115,7 +3123,8 @@
                                         "example": "Bánh ngọt"
                                     },
                                     "phone_number": {
-                                        "type": "0387768880"
+                                        "type": "string",
+                                        "example": "0387768880"
                                     },
                                     "image": {
                                         "type": "string",
@@ -3225,8 +3234,6 @@
         "securitySchemes": {
             "bearerAuth": {
                 "type": "http",
-                "name": "bearerAuth",
-                "in": "header",
                 "bearerFormat": "JWT",
                 "scheme": "bearer"
             }

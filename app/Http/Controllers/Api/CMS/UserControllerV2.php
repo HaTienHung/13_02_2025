@@ -187,10 +187,11 @@ class UserControllerV2 extends Controller
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
+     *                 type="object",
      *                 required={"_method", "name", "phone_number"},
      *                 @OA\Property(property="_method", type="string", example="PUT"),
      *                 @OA\Property(property="name", type="string", example="Bánh ngọt"),
-     *                 @OA\Property(property="phone_number", type="0387768880"),
+     *                 @OA\Property(property="phone_number", type="string", example="0387768880"),
      *                 @OA\Property(property="image", type="string", format="binary")
      *             )
      *         )
@@ -207,7 +208,7 @@ class UserControllerV2 extends Controller
                 'phone_number' => 'required|string|unique:users,phone_number,' . $id,
             ]);
 
-            $user = $this->userRepository->createOrUpdate($data, ['id'=>$id]);
+            $user = $this->userRepository->createOrUpdate($data, ['id' => $id]);
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,

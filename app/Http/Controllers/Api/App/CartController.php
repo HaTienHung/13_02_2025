@@ -157,7 +157,7 @@ class CartController extends Controller
                 'items.*.quantity' => 'required|integer|min:1'
             ]);
 
-            $this->cartService->updateMultipleItems($data['items'],auth()->id());
+            $this->cartService->updateMultipleItems($data['items'], auth()->id());
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
@@ -172,56 +172,54 @@ class CartController extends Controller
             ], Response::HTTP_BAD_REQUEST);
         }
     }
-
-
-    /**
-     * @OA\Delete(
-     *     path="/api/app/cart/delete",
-     *     summary="Xóa nhiều sản phẩm khỏi giỏ hàng",
-     *     description="Xóa một hoặc nhiều sản phẩm khỏi giỏ hàng của người dùng đã đăng nhập.",
-     *     tags={"APP Cart"},
-     *     security={{ "bearerAuth":{} }},
-     *
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"product_ids"},
-     *             @OA\Property(
-     *                 property="product_ids",
-     *                 type="array",
-     *                 @OA\Items(type="integer"),
-     *                 example={1, 2, 3}
-     *             )
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=200,
-     *         description="Xóa sản phẩm thành công",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Xóa sản phẩm thành công."),
-     *             @OA\Property(property="deleted_count", type="integer", example=3)
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=422,
-     *         description="Dữ liệu không hợp lệ",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="The given data was invalid."),
-     *             @OA\Property(property="errors", type="object")
-     *         )
-     *     ),
-     *
-     *     @OA\Response(
-     *         response=401,
-     *         description="Chưa đăng nhập",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Unauthenticated.")
-     *         )
-     *     )
-     * )
-     */
+    // /**
+    //  * @OA\Delete(
+    //  *     path="/api/app/cart/delete",
+    //  *     summary="Xóa nhiều sản phẩm khỏi giỏ hàng",
+    //  *     description="Xóa một hoặc nhiều sản phẩm khỏi giỏ hàng của người dùng đã đăng nhập.",
+    //  *     tags={"APP Cart"},
+    //  *     security={{ "bearerAuth":{} }},
+    //  *
+    //  *     @OA\RequestBody(
+    //  *         required=true,
+    //  *         @OA\JsonContent(
+    //  *             required={"product_ids"},
+    //  *             @OA\Property(
+    //  *                 property="product_ids",
+    //  *                 type="array",
+    //  *                 @OA\Items(type="integer"),
+    //  *                 example={1, 2, 3}
+    //  *             )
+    //  *         )
+    //  *     ),
+    //  *
+    //  *     @OA\Response(
+    //  *         response=200,
+    //  *         description="Xóa sản phẩm thành công",
+    //  *         @OA\JsonContent(
+    //  *             @OA\Property(property="message", type="string", example="Xóa sản phẩm thành công."),
+    //  *             @OA\Property(property="deleted_count", type="integer", example=3)
+    //  *         )
+    //  *     ),
+    //  *
+    //  *     @OA\Response(
+    //  *         response=422,
+    //  *         description="Dữ liệu không hợp lệ",
+    //  *         @OA\JsonContent(
+    //  *             @OA\Property(property="message", type="string", example="The given data was invalid."),
+    //  *             @OA\Property(property="errors", type="object")
+    //  *         )
+    //  *     ),
+    //  *
+    //  *     @OA\Response(
+    //  *         response=401,
+    //  *         description="Chưa đăng nhập",
+    //  *         @OA\JsonContent(
+    //  *             @OA\Property(property="message", type="string", example="Unauthenticated.")
+    //  *         )
+    //  *     )
+    //  * )
+    //  */
     public function multipleDelete(Request $request): JsonResponse
     {
 
