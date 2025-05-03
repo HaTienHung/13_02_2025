@@ -8,7 +8,7 @@
 
 -   **Frontend**: [My E-commerce Project - Frontend](https://my-new-project-three-phi.vercel.app) (Trang sản phẩm)
 -   **Frontend**: [My E-commerce Project - Frontend](https://my-new-project-three-phi.vercel.app/cms/dashboard) (Trang quản lí)
--   **API Docs (Swagger)**: [Swagger API Docs](https://13022025-production.up.railway.app/docs)
+-   **API Docs (Swagger)**:https://13022025-production.up.railway.app/docs
 -   👉 Mở [Swagger Editor](https://editor.swagger.io), chọn "File > Import URL", rồi dán link JSON vào để test API.
 
 ---
