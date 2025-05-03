@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 /**
- * @OA\Info(title="App", version="0.1")
+ * @OA\Info(title="App", version="3.0.1")
  * @OA\PathItem (
  *     path="/api/doc",
  *     ),
