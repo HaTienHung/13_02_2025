@@ -8,7 +8,7 @@
 
 -   **Frontend**: [My E-commerce Project - Frontend](https://my-new-project-three-phi.vercel.app) (Trang sản phẩm)
 -   **Frontend**: [My E-commerce Project - Frontend](https://my-new-project-three-phi.vercel.app/cms/dashboard) (Trang quản lí)
--   **API Docs (Swagger)**:https://13022025-production.up.railway.app/docs
+-   **API Docs (Swagger)**: https://13022025-production.up.railway.app/docs
 -   👉 Mở [Swagger Editor](https://editor.swagger.io), chọn "File > Import URL", rồi dán link JSON vào để test API.
 
 ---
@@ -31,7 +31,7 @@
 -   ✅ **Quản lý**:
     -   **Sản phẩm**
     -   **Đơn hàng**
-    -   **Tồn kho** (inventory tracking)
+    -   **Tồn kho** (Theo dõi tồn kho , lịch sử nhập/xuất)
 -   ✅ **Tìm kiếm**, **Phân trang**, và **Lọc sản phẩm**
 -   ✅ **Swagger API**: Được tích hợp để test API trực tiếp
 

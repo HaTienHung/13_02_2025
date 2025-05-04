@@ -92,6 +92,7 @@ class UserController extends Controller
      *                 @OA\Property(property="_method", type="string", example="PUT"),
      *                 @OA\Property(property="name", type="string", example="Bánh ngọt"),
      *                 @OA\Property(property="phone_number", type="string", example="0387768880"),
+     *                 @OA\Property(property="address", type="string", example="Hai Bà Trưng , Hà Nội"),
      *                 @OA\Property(property="image", type="string", format="binary")
      *             )
      *         )
@@ -106,6 +107,7 @@ class UserController extends Controller
         try {
             $data = $request->validate([
                 'name' => 'required|string',
+                'address' => 'required|string',
                 'phone_number' => 'required|string|unique:users,phone_number,' . auth()->id(),
             ]);
 
