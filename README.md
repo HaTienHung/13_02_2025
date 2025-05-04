@@ -1,6 +1,6 @@
 # 🛒 My E-commerce Project
 
-Ứng dụng web thương mại điện tử full-stack với các tính năng quản lý người dùng, giỏ hàng, sản phẩm và theo dõi tồn kho.
+Ứng dụng web thương mại điện tử full-stack với các tính năng giỏ hàng , quản lí đơn hàng , sản phẩm và theo dõi tồn kho.
 
 ---
 
@@ -29,8 +29,9 @@
 -   ✅ **Giỏ hàng**: Thêm, xoá, và sửa số lượng sản phẩm trong giỏ.
 -   ✅ **Đặt hàng**: Người dùng đặt hàng từ giỏ hàng.
 -   ✅ **Quản lý**:
-    -   **Sản phẩm**
-    -   **Đơn hàng**
+    -   **Sản phẩm** (Thêm , sửa , xoá sản phẩm)
+    -   **Đơn hàng** (Cập nhật trạng thái đơn hàng)
+    -   **Danh mục** (Thêm , sửa , xoá , đơn hàng)
     -   **Tồn kho** (Theo dõi tồn kho , lịch sử nhập/xuất)
 -   ✅ **Tìm kiếm**, **Phân trang**, và **Lọc sản phẩm**
 -   ✅ **Swagger API**: Được tích hợp để test API trực tiếp
