@@ -161,7 +161,7 @@ class UserControllerV2 extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
-                'message' => trans('message.errors.not_found')
+                'message' => trans('messages.errors.not_found')
             ], Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return response()->json([
@@ -212,13 +212,13 @@ class UserControllerV2 extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.user.update'),
+                'message' => trans('messages.success.user.update'),
                 'data' => $user
             ], Response::HTTP_OK);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
-                'message' => trans('message.errors.not_found')
+                'message' => trans('messages.errors.not_found')
             ], Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return response()->json([

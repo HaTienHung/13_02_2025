@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\CMS;
 
 use App\Enums\Constant;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CMS\ProductRequest;
 use App\Imports\ProductV2Import;
 use App\Repositories\Product\ProductRepository;
 use App\Services\Product\ProductService;
@@ -124,7 +125,7 @@ class ProductControllerV2 extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        try{
+        try {
             $perpage = $request->perpage ?: Constant::PER_PAGE;
             $listProduct = $this->productRepository->listProduct($perpage);
             return response()->json([
@@ -134,9 +135,9 @@ class ProductControllerV2 extends Controller
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
-                'status'=>Constant::FALSE_CODE,
+                'status' => Constant::FALSE_CODE,
                 'message' => $th->getMessage()
-            ],Response::HTTP_INTERNAL_SERVER_ERROR);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -173,7 +174,7 @@ class ProductControllerV2 extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
-                'message' => trans('message.errors.not_found'),
+                'message' => trans('messages.errors.not_found'),
             ], Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return response()->json([
@@ -189,6 +190,16 @@ class ProductControllerV2 extends Controller
      *     tags={"CMS Products"},
      *     summary="Tạo sản phẩm mới",
      *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         in="header",
+     *         name="X-Localization",  
+     *         required=false,
+     *         description="Ngôn ngữ",
+     *         @OA\Schema(
+     *             type="string",
+     *             example="vi",  
+     *         )
+     *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
@@ -203,16 +214,10 @@ class ProductControllerV2 extends Controller
      *     )
      * )
      */
-    public function store(Request $request): JsonResponse
+    public function store(ProductRequest $request): JsonResponse
     {
         try {
-            $data = $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'nullable|string|max:2000',
-                'price' => 'required|numeric|min:0',
-                'category_id' => 'required|integer|min:0|exists:categories,id',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-            ]);
+            $data = $request->all();
             $file = $request->file('image');
 
             $result = cloudinary()
@@ -226,7 +231,7 @@ class ProductControllerV2 extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.product.create'),
+                'message' => trans('messages.success.product.create'),
                 'data' => $this->productRepository->createOrUpdate($data),
             ], Response::HTTP_CREATED);
         } catch (Exception $e) {
@@ -268,22 +273,15 @@ class ProductControllerV2 extends Controller
      *     @OA\Response(response=422, description="Lỗi validate")
      * )
      */
-    public function update(Request $request, $id): JsonResponse
+    public function update(ProductRequest $request, $id): JsonResponse
     {
         try {
-            $request->validate([
-                'name' => 'required|string',
-                'description' => 'nullable|string|max:2000',
-                'price' => 'required|numeric',
-                'category_id' => 'required|integer|exists:categories,id',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-            ]);
 
             $data = $request->all(); // lấy data trước
 
             $product = $this->productRepository->find($id);
 
-// Nếu có ảnh mới thì upload và xoá ảnh cũ
+            // Nếu có ảnh mới thì upload và xoá ảnh cũ
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
 
@@ -303,17 +301,17 @@ class ProductControllerV2 extends Controller
                 $data['image_url'] = $uploadResult['secure_url'];
             }
 
-// Cập nhật sản phẩm
-            $this->productRepository->createOrUpdate($data, ['id'=>$id]);
+            // Cập nhật sản phẩm
+            $this->productRepository->createOrUpdate($data, ['id' => $id]);
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.product.update'),
+                'message' => trans('messages.success.product.update'),
                 'product' => $product
             ], Response::HTTP_OK);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
-                'message' => trans('message.errors.not_found')
+                'message' => trans('messages.errors.not_found')
             ], Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return response()->json([
@@ -356,12 +354,12 @@ class ProductControllerV2 extends Controller
             $this->productRepository->delete($id);
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.product.delete')
+                'message' => trans('messages.success.product.delete')
             ], Response::HTTP_OK);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
-                'message' => trans('message.errors.not_found')
+                'message' => trans('messages.errors.not_found')
             ], Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return response()->json([
@@ -417,7 +415,7 @@ class ProductControllerV2 extends Controller
 
         return response()->json([
             'status' => Constant::SUCCESS_CODE,
-            'message' => trans('message.success.success')
+            'message' => trans('messages.success.success')
         ], Response::HTTP_OK);
     }
 }

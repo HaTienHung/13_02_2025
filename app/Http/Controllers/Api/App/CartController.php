@@ -51,7 +51,7 @@ class CartController extends Controller
         $cart = $this->cartRepository->findAllBy(['user_id' => auth()->id()], ['product']);
 
         return response()->json([
-            'message' => trans('message.success.success'),
+            'message' => trans('messages.success.success'),
             'data' => $cart
         ], Response::HTTP_OK);
     }
@@ -101,7 +101,7 @@ class CartController extends Controller
 
                 return response()->json([
                     'status' => Constant::SUCCESS_CODE,
-                    'message' => trans('message.success.cart.store')
+                    'message' => trans('messages.success.cart.store')
                 ], Response::HTTP_OK);
             } else {
                 // Nếu không, tạo mới mục giỏ hàng
@@ -109,7 +109,7 @@ class CartController extends Controller
 
                 return response()->json([
                     'status' => Constant::SUCCESS_CODE,
-                    'message' => trans('message.success.cart.create')
+                    'message' => trans('messages.success.cart.create')
                 ], Response::HTTP_CREATED);
             }
         } catch (Exception $e) {
@@ -161,7 +161,7 @@ class CartController extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.cart.update'),
+                'message' => trans('messages.success.cart.update'),
                 'data' => $data
             ], Response::HTTP_OK);
         } catch (Exception $e) {
@@ -234,7 +234,7 @@ class CartController extends Controller
 
             $this->cartRepository->deleteBy([['user_id', '=', auth()->id()], ['product_id', 'in', $request->product_ids]]);
 
-            return response()->json(['message' => trans('message.success.cart.delete')], Response::HTTP_OK);
+            return response()->json(['message' => trans('messages.success.cart.delete')], Response::HTTP_OK);
         } catch (Exception $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
@@ -313,7 +313,7 @@ class CartController extends Controller
             ]);
 
             return response()->json([
-                'message' => trans('message.success.cart.delete'),
+                'message' => trans('messages.success.cart.delete'),
                 'id' => $product
             ], Response::HTTP_OK);
         } catch (Exception $e) {
@@ -340,7 +340,7 @@ class CartController extends Controller
         $this->cartRepository->deleteBy(['user_id' => auth()->id()]);
         return response()->json([
             'status' => Constant::SUCCESS_CODE,
-            'message' => trans('message.success.cart.clear')
+            'message' => trans('messages.success.cart.clear')
         ], Response::HTTP_OK);
     }
 
@@ -406,7 +406,7 @@ class CartController extends Controller
 
             $order = $this->cartService->checkout(auth()->id(), $request->product_ids);
 
-            return response()->json(['message' => trans('message.success.cart.checkout'), 'order' => $order], Response::HTTP_CREATED);
+            return response()->json(['message' => trans('messages.success.cart.checkout'), 'order' => $order], Response::HTTP_CREATED);
         } catch (Exception $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,

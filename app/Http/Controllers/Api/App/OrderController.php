@@ -94,7 +94,7 @@ class OrderController extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.order.checkout'),
+                'message' => trans('messages.success.order.checkout'),
                 'order_id' => $order->id
             ], Response::HTTP_CREATED);
         } catch (Exception $e) {
@@ -150,7 +150,7 @@ class OrderController extends Controller
             // Trả về danh sách đơn hàng của người dùng
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.success'),
+                'message' => trans('messages.success.success'),
                 'data' => OrderResource::collection($orders)
             ]);
         } catch (Exception $e) {
@@ -293,7 +293,7 @@ class OrderController extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.order.update'),
+                'message' => trans('messages.success.order.update'),
                 'data' => $order
             ], Response::HTTP_OK);
         } catch (Exception $e) {
@@ -336,7 +336,7 @@ class OrderController extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.order.delete')
+                'message' => trans('messages.success.order.delete')
             ], Response::HTTP_OK);
         } catch (Exception $e) {
             return response()->json([

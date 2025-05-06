@@ -50,7 +50,7 @@ class CartService
             DB::commit();
             return [
                 'status' => Response::HTTP_OK,
-                'message' => trans('message.success.cart.update')
+                'message' => trans('messages.success.cart.update')
             ];
         } catch (\Exception $e) {
             DB::rollBack();

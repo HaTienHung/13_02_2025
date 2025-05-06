@@ -1016,6 +1016,16 @@
                 "operationId": "adf79f63cd50aadd67735f6b8a1d8979",
                 "parameters": [
                     {
+                        "name": "X-Localization",
+                        "in": "header",
+                        "description": "Ngôn ngữ",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "vi"
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
                         "description": "Trang",
@@ -1811,6 +1821,18 @@
                 ],
                 "summary": "Thêm số lượng sản phẩm vào kho",
                 "operationId": "9f2042e1c8aeb851dee1d22175703760",
+                "parameters": [
+                    {
+                        "name": "X-Localization",
+                        "in": "header",
+                        "description": "Ngôn ngữ",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "vi"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2636,6 +2658,18 @@
                 ],
                 "summary": "Tạo sản phẩm mới",
                 "operationId": "6a4881953f7193dffa4d7b9aa3ba8934",
+                "parameters": [
+                    {
+                        "name": "X-Localization",
+                        "in": "header",
+                        "description": "Ngôn ngữ",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "vi"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {

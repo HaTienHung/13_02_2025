@@ -41,6 +41,16 @@ class ProductController extends Controller
      *     path="/api/products",
      *     tags={"APP Products"},
      *     summary="Lấy ra danh sách sản phẩm",
+     *     @OA\Parameter(
+     *         in="header",
+     *         name="X-Localization",  
+     *         required=false,
+     *         description="Ngôn ngữ",
+     *         @OA\Schema(
+     *             type="string",
+     *             example="vi",  
+     *         )
+     *     ),
      *          @OA\Parameter(
      *           in="query",
      *           name="page",
@@ -118,7 +128,7 @@ class ProductController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        try{
+        try {
             $perpage = $request->perpage ?: Constant::PER_PAGE;
             $listProduct = $this->productRepository->listProduct($perpage);
             return response()->json([
@@ -128,9 +138,9 @@ class ProductController extends Controller
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
-                'status'=>Constant::FALSE_CODE,
+                'status' => Constant::FALSE_CODE,
                 'message' => $th->getMessage()
-            ],Response::HTTP_INTERNAL_SERVER_ERROR);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     /**
@@ -150,7 +160,7 @@ class ProductController extends Controller
      */
     public function getLastestProducts(Request $request): JsonResponse
     {
-        try{
+        try {
             $listProduct = $this->productRepository->getLastestProducts();
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
@@ -159,9 +169,9 @@ class ProductController extends Controller
             ], Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
-                'status'=>Constant::FALSE_CODE,
+                'status' => Constant::FALSE_CODE,
                 'message' => $th->getMessage()
-            ],Response::HTTP_INTERNAL_SERVER_ERROR);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     /**
@@ -187,7 +197,7 @@ class ProductController extends Controller
     public function show($id): JsonResponse
     {
         try {
-            $product = $this->productRepository->findBy('id',$id);
+            $product = $this->productRepository->findBy('id', $id);
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
                 'message' => 'Thông tin sản phẩm',
@@ -196,7 +206,7 @@ class ProductController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
-                'message' => trans('message.errors.not_found'),
+                'message' => trans('messages.errors.not_found'),
             ], Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return response()->json([
@@ -227,7 +237,7 @@ class ProductController extends Controller
     public function showBySlug($slug): JsonResponse
     {
         try {
-            $product = $this->productRepository->findBy('slug',$slug);
+            $product = $this->productRepository->findBy('slug', $slug);
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
                 'message' => 'Thông tin sản phẩm',
@@ -236,7 +246,7 @@ class ProductController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
-                'message' => trans('message.errors.not_found'),
+                'message' => trans('messages.errors.not_found'),
             ], Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return response()->json([

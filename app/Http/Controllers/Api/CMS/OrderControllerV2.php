@@ -164,7 +164,7 @@ class OrderControllerV2 extends Controller
         } catch (ModelNotFoundException $e) { //FirstOrFail tu dong nem ra ModelNotFound
             return response()->json([
                 'status' => Constant::FALSE_CODE,
-                'message' => trans('message.errors.not_found')
+                'message' => trans('messages.errors.not_found')
             ], Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return response()->json([
@@ -260,7 +260,7 @@ class OrderControllerV2 extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.order.create'),
+                'message' => trans('messages.success.order.create'),
                 'order_id' => $order->id
             ], Response::HTTP_CREATED);
         } catch (Throwable $th) {
@@ -331,16 +331,16 @@ class OrderControllerV2 extends Controller
             // Validate các trường thông tin đầu vào
             $request->validate([
                 'status' => 'required|in:pending,completed,cancelled',
-//                'items' => 'required|array', // Đảm bảo items là mảng
-//                'items.*.product_id' => 'required|integer|min:1|exists:products,id', // Kiểm tra sản phẩm tồn tại trong bảng products
-//                'items.*.quantity' => 'required|integer|min:1', // Kiểm tra số lượng hợp lệ cho từng sản phẩm
+                //                'items' => 'required|array', // Đảm bảo items là mảng
+                //                'items.*.product_id' => 'required|integer|min:1|exists:products,id', // Kiểm tra sản phẩm tồn tại trong bảng products
+                //                'items.*.quantity' => 'required|integer|min:1', // Kiểm tra số lượng hợp lệ cho từng sản phẩm
             ]);
 
-            $order = $this->orderRepository->createOrUpdate($request->all(),['id'=>$id]);
+            $order = $this->orderRepository->createOrUpdate($request->all(), ['id' => $id]);
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.order.update'),
+                'message' => trans('messages.success.order.update'),
                 'data' => new OrderResource($order)
             ], Response::HTTP_OK);
         } catch (ModelNotFoundException $e) {
@@ -383,7 +383,7 @@ class OrderControllerV2 extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.order.delete')
+                'message' => trans('messages.success.order.delete')
             ], Response::HTTP_OK);
         } catch (Exception $e) {
             return response()->json([
@@ -446,7 +446,7 @@ class OrderControllerV2 extends Controller
     {
         try {
             $orders = $this->orderRepository->listOrder();
-//            return response()->json(['orders' => $orders]);
+            //            return response()->json(['orders' => $orders]);
         } catch (Throwable $th) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
@@ -454,8 +454,9 @@ class OrderControllerV2 extends Controller
                 'data' => []
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return Excel::download(new OrderV2Export($orders),
-            'Order' . str_replace('/', '-', date('Y/m/d')) . '.xlsx');
+        return Excel::download(
+            new OrderV2Export($orders),
+            'Order' . str_replace('/', '-', date('Y/m/d')) . '.xlsx'
+        );
     }
-
 }

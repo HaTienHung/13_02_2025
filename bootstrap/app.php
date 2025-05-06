@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\LocalizationMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\{Exceptions, Middleware};
@@ -19,26 +20,27 @@ return Application::configure(basePath: dirname(__DIR__))
         //
         $middleware->alias([
             'role' => RoleMiddleware::class,
+            'language' => LocalizationMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
         $exceptions->render(function (ValidationException $e, $request) {
             return response()->json([
-                'message' => trans('message.errors.validation.invalid_data'),
+                'message' => trans('messages.errors.validation.invalid_data'),
                 'errors' => $e->errors(),
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         });
 
         $exceptions->render(function (AuthenticationException $e, $request) {
             return response()->json([
-                'message' => trans('message.errors.auth.unauthorized'),
+                'message' => trans('messages.errors.auth.unauthorized'),
             ], Response::HTTP_UNAUTHORIZED);
         });
 
         $exceptions->render(function (AuthorizationException $e, $request) {
             return response()->json([
-                'message' => trans('message.errors.auth.forbidden'),
+                'message' => trans('messages.errors.auth.forbidden'),
             ], Response::HTTP_FORBIDDEN);
         });
 

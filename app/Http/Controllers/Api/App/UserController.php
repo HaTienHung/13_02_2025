@@ -106,8 +106,8 @@ class UserController extends Controller
     {
         try {
             $data = $request->validate([
-                'name' => 'required|string',
-                'address' => 'required|string',
+                'name' => 'required|string|max:50',
+                'address' => 'required|string|max:150',
                 'phone_number' => 'required|string|unique:users,phone_number,' . auth()->id(),
             ]);
 
@@ -115,13 +115,13 @@ class UserController extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.user.update'),
+                'message' => trans('messages.success.user.update'),
                 'data' => $user
             ], Response::HTTP_OK);
         } catch (ModelNotFoundException $e) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
-                'message' => trans('message.errors.not_found')
+                'message' => trans('messages.errors.not_found')
             ], Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
             return response()->json([

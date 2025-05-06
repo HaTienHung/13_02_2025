@@ -23,7 +23,7 @@ class RoleMiddleware
         $role_name = Role::where('id', $user->role_id)->first()->name;
 
         if (!$user || $role_name !== $role) {
-            throw new AuthorizationException(trans('message.errors.auth.unauthorized'));
+            throw new AuthorizationException(trans('messages.errors.auth.unauthorized'));
         }
         return $next($request);
     }

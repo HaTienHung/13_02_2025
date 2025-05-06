@@ -27,7 +27,7 @@ class AuthController extends Controller
      * @param User $user
      */
 
-    public function __construct(UserRepository $userRepository , User $user)
+    public function __construct(UserRepository $userRepository, User $user)
     {
         $this->userRepository = $userRepository;
         $this->user = $user;
@@ -69,7 +69,7 @@ class AuthController extends Controller
                 return response()->json([
                     'status' => Response::HTTP_BAD_REQUEST,
                     'errorCode' => 'E_UC2_1',
-                    'message' => trans('message.errors.user.email_not_found'),
+                    'message' => trans('messages.errors.user.email_not_found'),
                     'data' => []
                 ], Response::HTTP_BAD_REQUEST);
             }
@@ -78,7 +78,7 @@ class AuthController extends Controller
             if (!Auth::attempt($credentials)) {
                 return response()->json([
                     'status'  => Response::HTTP_BAD_REQUEST,
-                    'message' => trans('message.errors.auth.unauthenticated'),
+                    'message' => trans('messages.errors.auth.unauthenticated'),
                     'data' => []
                 ], Response::HTTP_BAD_REQUEST);
             }
@@ -92,10 +92,9 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => Response::HTTP_OK,
-                'message' => trans('message.success.user.login_success'),
+                'message' => trans('messages.success.user.login_success'),
                 'data' => $data
             ], Response::HTTP_OK);
-
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => Constant::FALSE_CODE,
@@ -134,7 +133,7 @@ class AuthController extends Controller
             } else {
                 return response()->json([
                     'status' => Constant::UNAUTHORIZED_CODE,
-                    'message' => trans('message.errors.auth.unauthorized'),
+                    'message' => trans('messages.errors.auth.unauthorized'),
                 ], Constant::UNAUTHORIZED_CODE);
             }
 
@@ -142,10 +141,9 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.users.logout_sucess'),
+                'message' => trans('messages.success.users.logout_sucess'),
                 'data' => []
             ], Constant::SUCCESS_CODE);
-
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
@@ -211,7 +209,7 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.user.create'),
+                'message' => trans('messages.success.user.create'),
                 'data' => $user
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {

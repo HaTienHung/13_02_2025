@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\CMS;
 
 use App\Enums\Constant;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CMS\CategoryRequest;
 use App\Repositories\Category\CategoryInterface;
 use App\Services\Category\CategoryService;
 use Exception;
@@ -179,11 +180,11 @@ class CategoryControllerV2 extends Controller
      *     )
      * )
      */
-    public function store(Request $request): JsonResponse
+    public function store(CategoryRequest $request): JsonResponse
     {
         try {
             $request->validate([
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|min:2',
                 'slug' => 'nullable',
             ]);
 
@@ -191,7 +192,7 @@ class CategoryControllerV2 extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.category.create'),
+                'message' => trans('messages.success.category.create'),
                 'category' => $category
             ], Response::HTTP_CREATED);
         } catch (Exception $e) {
@@ -235,7 +236,7 @@ class CategoryControllerV2 extends Controller
      *     @OA\Response(response=400, description="Dữ liệu không hợp lệ")
      * )
      */
-    public function update(Request $request, $categoryId): JsonResponse
+    public function update(CategoryRequest $request, $categoryId): JsonResponse
     {
         try {
             $request->validate([
@@ -247,7 +248,7 @@ class CategoryControllerV2 extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.category.update'),
+                'message' => trans('messages.success.category.update'),
                 'data' => $category
             ], Response::HTTP_OK);
         } catch (Exception $e) {
@@ -289,7 +290,7 @@ class CategoryControllerV2 extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.category.delete')
+                'message' => trans('messages.success.category.delete')
             ], Response::HTTP_OK);
         } catch (Exception $e) {
             return response()->json([

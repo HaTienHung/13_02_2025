@@ -32,8 +32,7 @@ class OrderService
         ProductInterface   $productRepository,
         OrderItemInterface $orderItemRepository,
         InventoryService   $inventoryService
-    )
-    {
+    ) {
         $this->orderRepository = $orderRepository;
         $this->productRepository = $productRepository;
         $this->orderItemRepository = $orderItemRepository;
@@ -96,7 +95,7 @@ class OrderService
 
             // Kiểm tra quyền: Chỉ user sở hữu đơn hàng mới có quyền cập nhật
             if ($order->user_id !== $userId && !auth()->user()->isAdmin()) {
-                throw new Exception(trans('message.errors.auth.forbidden'), Response::HTTP_FORBIDDEN);
+                throw new Exception(trans('messages.errors.auth.forbidden'), Response::HTTP_FORBIDDEN);
             }
 
             // Kiểm tra trạng thái đơn hàng (chỉ cho phép sửa khi đơn hàng đang 'pending')
@@ -186,7 +185,7 @@ class OrderService
             return $order;
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
-            throw new Exception(trans('message.errors.not_found'), Response::HTTP_NOT_FOUND);
+            throw new Exception(trans('messages.errors.not_found'), Response::HTTP_NOT_FOUND);
         }
     }
 
@@ -199,7 +198,7 @@ class OrderService
 
             // Kiểm tra quyền: chỉ user sở hữu hoặc admin mới có quyền xoá
             if ($order->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
-                throw new Exception(trans('message.errors.auth.forbidden'), Response::HTTP_FORBIDDEN);
+                throw new Exception(trans('messages.errors.auth.forbidden'), Response::HTTP_FORBIDDEN);
             }
 
             // Lấy danh sách sản phẩm trong đơn hàng
@@ -220,7 +219,7 @@ class OrderService
             return true;
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
-            throw new Exception(trans('message.errors.not_found'), Response::HTTP_NOT_FOUND);
+            throw new Exception(trans('messages.errors.not_found'), Response::HTTP_NOT_FOUND);
         }
     }
 }

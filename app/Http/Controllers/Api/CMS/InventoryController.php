@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\CMS;
 use App\Enums\Constant;
 use App\Exports\StockReportExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CMS\InventoryRequest;
 use App\Repositories\Inventory\InventoryRepository;
 use App\Services\Inventory\InventoryService;
 use Exception;
@@ -43,6 +44,16 @@ class InventoryController extends Controller
      *     tags={"CMS Inventories"},
      *     summary="Thêm số lượng sản phẩm vào kho",
      *     security={{"bearerAuth":{}}},
+     *   @OA\Parameter(
+     *         in="header",
+     *         name="X-Localization",  
+     *         required=false,
+     *         description="Ngôn ngữ",
+     *         @OA\Schema(
+     *             type="string",
+     *             example="vi",  
+     *         )
+     *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
@@ -58,7 +69,7 @@ class InventoryController extends Controller
      *     )
      * )
      */
-    public function store(Request $request): JsonResponse
+    public function store(InventoryRequest $request): JsonResponse
     {
         try {
             $request->validate([
@@ -70,7 +81,7 @@ class InventoryController extends Controller
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,
-                'message' => trans('message.success.inventory.create'),
+                'message' => trans('messages.success.inventory.create'),
                 'data' => $inventoryTransaction
             ], Response::HTTP_CREATED);
         } catch (Exception $e) {
@@ -201,7 +212,7 @@ class InventoryController extends Controller
             if ($inventoryRecords->isEmpty()) {
                 return response()->json([
                     'status' => Constant::FALSE_CODE,
-                    'message' => trans('message.errors.not_found'),
+                    'message' => trans('messages.errors.not_found'),
                     'data' => $inventoryRecords
                 ], Response::HTTP_NOT_FOUND);
             }

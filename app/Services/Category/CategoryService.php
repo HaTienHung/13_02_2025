@@ -14,7 +14,7 @@ class CategoryService
     protected CategoryInterface $categoryRepository;
     protected ProductInterface $productRepository;
 
-    public function __construct(CategoryInterface $categoryRepository , ProductInterface $productRepository)
+    public function __construct(CategoryInterface $categoryRepository, ProductInterface $productRepository)
     {
         $this->categoryRepository = $categoryRepository;
         $this->productRepository = $productRepository;
@@ -29,7 +29,7 @@ class CategoryService
 
         //Nếu danh mục đã tồn tại và ID danh mục này khác với danh mục cần sửa thì không cho sửa
         if ($existingCategory && $existingCategory->id !== $id) {
-            throw new Exception(trans('message.errors.category.exists'), Response::HTTP_UNPROCESSABLE_ENTITY);
+            throw new Exception(trans('messages.errors.category.exists'), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return $this->categoryRepository->update($id, $data);
@@ -41,18 +41,17 @@ class CategoryService
             $category = $this->categoryRepository->find($id);
             // Kiểm tra xem danh mục có sản phẩm không
             if ($category->products()->exists()) {
-                throw new Exception(trans('message.errors.category.cannot_delete'), Response::HTTP_UNPROCESSABLE_ENTITY);
+                throw new Exception(trans('messages.errors.category.cannot_delete'), Response::HTTP_UNPROCESSABLE_ENTITY);
             }
             // Thực hiện xóa danh mục
             if (!$this->categoryRepository->delete($id)) {
-                throw new Exception(trans('message.errors.category.delete'), Response::HTTP_INTERNAL_SERVER_ERROR);
+                throw new Exception(trans('messages.errors.category.delete'), Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
             return true;
         } catch (ModelNotFoundException $e) {
-            throw new Exception(trans('message.errors.not_found'),Response::HTTP_NOT_FOUND);
+            throw new Exception(trans('messages.errors.not_found'), Response::HTTP_NOT_FOUND);
         }
-
     }
 
     public function createCategory(array $data)
@@ -61,7 +60,7 @@ class CategoryService
         $existingCategory = $this->categoryRepository->findBy('name', $data['name']);
 
         if ($existingCategory) {
-            throw new Exception(trans('message.errors.category.exists'), Response::HTTP_UNPROCESSABLE_ENTITY);
+            throw new Exception(trans('messages.errors.category.exists'), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         return $this->categoryRepository->create($data);
@@ -71,20 +70,19 @@ class CategoryService
     {
         try {
             return  $this->categoryRepository->findById($categoryId, ['products']);
-
         } catch (ModelNotFoundException $e) {
-            throw new Exception(trans('message.errors.not_found'), Response::HTTP_NOT_FOUND);
+            throw new Exception(trans('messages.errors.not_found'), Response::HTTP_NOT_FOUND);
         }
     }
-    public function getProductsByCategorySlug($slug , $perPage = Constant::PER_PAGE)
+    public function getProductsByCategorySlug($slug, $perPage = Constant::PER_PAGE)
     {
         try {
 
-//            return $this->categoryRepository->findAllBy(['slug'=>$slug],['products']);
-            $category = $this->categoryRepository->findBy('slug',$slug);
+            //            return $this->categoryRepository->findAllBy(['slug'=>$slug],['products']);
+            $category = $this->categoryRepository->findBy('slug', $slug);
             return $this->productRepository->paginateByCategoryId($category->id, $perPage);
         } catch (ModelNotFoundException $e) {
-            throw new Exception(trans('message.errors.not_found'), Response::HTTP_NOT_FOUND);
+            throw new Exception(trans('messages.errors.not_found'), Response::HTTP_NOT_FOUND);
         }
     }
 }

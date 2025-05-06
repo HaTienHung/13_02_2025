@@ -2,33 +2,33 @@
 
 return [
     'success' => [
-        'success'=>'Success!',
+        'success' => 'Success!',
         'product' => [
-            'create' =>'Create product success!',
-            'update'=>'Update product success!',
-            'delete'=>'Delete product success!'
+            'create' => 'Create product success!',
+            'update' => 'Update product success!',
+            'delete' => 'Delete product success!'
         ],
         'category' => [
-            'create' =>'Create category success!',
-            'update'=>'Update category success!',
-            'delete'=>'Delete category success!'
+            'create' => 'Create category success!',
+            'update' => 'Update category success!',
+            'delete' => 'Delete category success!'
         ],
         'cart' => [
             'create' => 'Product successfully added to your shopping cart!',
-            'update'=>'Update cart success!',
-            'delete'=>'Delete cart success!',
-            'clear' =>'Clear cart success!',
+            'update' => 'Update cart success!',
+            'delete' => 'Delete cart success!',
+            'clear' => 'Clear cart success!',
             'checkout' => 'Order placed successfully.'
         ],
         'order' => [
-            'create'=>'Create order success!',
-            'update'=>'Update order success!',
-            'delete'=>'Delete order success!',
+            'create' => 'Create order success!',
+            'update' => 'Update order success!',
+            'delete' => 'Delete order success!',
         ],
-        'inventory'=>[
+        'inventory' => [
             'create' => 'Add product to inventory success!',
         ],
-        'user'=>[
+        'user' => [
             'create' => 'Create user success!',
             'update' => 'Update user success!',
             'delete' => 'Delete user success!',
@@ -48,7 +48,7 @@ return [
             'exists' => 'The category name already exists.!',
             'delete' => 'Delete category failed.! ',
             'cannot_delete' => 'Cannot delete the category because it still contains products.!',
-        ] ,
+        ],
         'validation' => [
             'invalid_data' => 'The provided data is invalid.',
         ],
