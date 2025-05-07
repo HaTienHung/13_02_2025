@@ -196,13 +196,19 @@ class OrderService
             // Lấy thông tin đơn hàng, nếu không tìm thấy sẽ ném ModelNotFoundException
             $order = $this->orderRepository->find($orderId);
 
+
+            if ($order->status === "completed") {
+                throw new Exception("Bạn không thể xoá đơn hàng khi ở trạng thái này");
+            }
+
             // Kiểm tra quyền: chỉ user sở hữu hoặc admin mới có quyền xoá
             if ($order->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
                 throw new Exception(trans('messages.errors.auth.forbidden'), Response::HTTP_FORBIDDEN);
             }
 
             // Lấy danh sách sản phẩm trong đơn hàng
-            $orderItems = $this->orderItemRepository->findAllById($orderId);
+            $orderItems = $this->orderItemRepository->findAllBy(["order_id" => $orderId]);
+
 
             // Khôi phục lại số lượng sản phẩm trong kho trước khi xoá
             foreach ($orderItems as $item) {

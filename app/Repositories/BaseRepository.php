@@ -38,17 +38,17 @@ abstract class BaseRepository implements BaseRepositoryInterface
 //        $this->initiate($request);
     }
 
-    private function initiate(Request $request): void
-    {
-        if ($this->USER = AuthFace::user()) {
-            $this->isLogin = true;
-        };
-        // Set global Parameter
-//        $this->current_language($request);
-        $this->PERPAGE = $request->input('perpage', Constant::PER_PAGE);
-        $this->PAGE = $request->input('page', 1);
-        $this->REQUEST = $request->toArray();
-    }
+//     private function initiate(Request $request): void
+//     {
+//         if ($this->USER = AuthFace::user()) {
+//             $this->isLogin = true;
+//         };
+//         // Set global Parameter
+// //        $this->current_language($request);
+//         $this->PERPAGE = $request->input('perpage', Constant::PER_PAGE);
+//         $this->PAGE = $request->input('page', 1);
+//         $this->REQUEST = $request->toArray();
+//     }
 
     public function paginate($perPage = 15, $columns = array('*'))
     {
@@ -106,15 +106,15 @@ abstract class BaseRepository implements BaseRepositoryInterface
         $this->model = new $this->originalModel();
         return $this;
     }
-
-    public function findAllById($id, array $with = [])
-    {
-        $data = $this->make($with)->where('id', $id);
-
-        $this->resetModel();
-
-        return $data->get();
-    }
+// 
+//     public function findAllById($id, array $with = [])
+//     {
+//         $data = $this->make($with)->where('id', $id);
+// 
+//         $this->resetModel();
+// 
+//         return $data->get();
+//     }
 
     public function deleteBy(array $condition = [])
     {

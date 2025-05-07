@@ -16,7 +16,7 @@ interface BaseRepositoryInterface
 
     public function findById($id, array $with = []);
 
-    public function findAllById($id, array $with = []);
+    // public function findAllById($id, array $with = []);
 
     public function findAllBy(array $condition = [], array $with = []);
 
