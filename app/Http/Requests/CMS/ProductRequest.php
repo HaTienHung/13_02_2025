@@ -33,7 +33,7 @@ class ProductRequest extends FormRequest
         $rule = [
           'name' => 'required|string|min:3|max:191',
           'description' => 'nullable|string|max:2000',
-          'price' => 'required|numeric',
+          'price' => 'required|numeric|min:1000',
           'category_id' => 'required|integer|exists:categories,id',
           'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ];
@@ -73,6 +73,7 @@ class ProductRequest extends FormRequest
         'description.max' => 'Mô tả sản phẩm không được vượt quá :max kí tự',
         'price.required' => 'Giá là trường bắt buộc',
         'price.numeric' => 'Giá phải là số ',
+        'price.min' => 'Giá phải lớn hơn 1000 VNĐ ',
         'category_id.required' => 'Danh mục sản phẩm là trường bắt buộc',
         'category_id.integer' => 'Danh mục sản phẩm là một số nguyên',
         'category_id.required' => 'Danh mục sản phẩm là trường bắt buộc',
@@ -92,6 +93,7 @@ class ProductRequest extends FormRequest
         'description.max' => 'The product description must not exceed :max characters.',
         'price.required' => 'Price is a required field.',
         'price.numeric' => 'The price must be a number.',
+        'price.min' => 'The price must be greater than 1000 VNĐ ',
         'category_id.required' => 'The product category is a required field.',
         'category_id.integer' => 'The product category must be an integer.',
         'category_id.exists' => 'The category does not exist in the system.',

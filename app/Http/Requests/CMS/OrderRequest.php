@@ -7,7 +7,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
-class CategoryRequest extends FormRequest
+class OrderRequest extends FormRequest
 {
   /**
    * Determine if the user is authorized to make this request.
@@ -30,14 +30,11 @@ class CategoryRequest extends FormRequest
 
     switch ($action):
       case "create":
-        $rule = [
-          'name' => 'required|string|max:255|min:2',
-        ];
+        $rule = [];
         break;
       case "update":
         $rule = [
-          'name' => 'required|string|max:255|min:2',
-          'slug' => 'required|string',
+          'status' => 'required|in:completed,cancelled',
         ];
         break;
       default:
@@ -58,21 +55,13 @@ class CategoryRequest extends FormRequest
 
     if ($lang == 'vi') {
       return [
-        'name.required' => 'Tên là bắt buộc.',
-        'name.string' => 'Tên phải là chuỗi.',
-        'name.max' => 'Tên không được vượt quá 255 ký tự.',
-        'name.min' => 'Tên không được ít hơn 2 ký tự.',
-        'slug.required' => 'Slug là bắt buộc.',
-        'slug.string' => 'Slug phải là chuỗi.',
+        'status.required' => 'Trường trạng thái là bắt buộc.',
+        'status.in' => 'Trường trạng thái chỉ được nhận các giá trị: completed, cancelled.',
       ];
     } else {
       return [
-        'name.required' => 'Name is required.',
-        'name.string' => 'Name must be a string.',
-        'name.max' => 'Name may not be greater than 255 characters.',
-        'name.min' => 'Name may not be less than 2 characters.',
-        'slug.required' => 'Slug is required.',
-        'slug.string' => 'Slug must be a string.',
+        'status.required' => 'The status field is required.',
+        'status.in' => 'The status must be one of the following: completed, cancelled.',
       ];
     }
   }

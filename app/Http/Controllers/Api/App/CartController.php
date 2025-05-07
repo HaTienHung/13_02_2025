@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api\App;
 
+use App\Rules\AvailableStock;
 use App\Enums\Constant;
 use App\Http\Controllers\Controller;
 use App\Repositories\Cart\CartRepository;
 use App\Services\Cart\CartService;
+use App\Services\Inventory\InventoryService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -76,13 +78,13 @@ class CartController extends Controller
      * )
      */
 
-    public function addToCart(Request $request): JsonResponse
+    public function addToCart(Request $request, InventoryService $inventoryService): JsonResponse
     {
         try {
             // Validate dữ liệu đầu vào
             $data = $request->validate([
                 'product_id' => 'required|exists:products,id',
-                'quantity' => 'required|integer|min:1'
+                'quantity' => ['required', 'integer', 'min:1', new AvailableStock($request->product_id, $inventoryService)],
             ]);
 
             // Lấy ID người dùng hiện tại
@@ -128,15 +130,9 @@ class CartController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"items"},
-     *             @OA\Property(
-     *                 property="items",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     @OA\Property(property="product_id", type="integer", example=1),
-     *                     @OA\Property(property="quantity", type="integer", example=3)
-     *                 )
-     *             )
+     *             required={"product_id", "quantity"},
+     *             @OA\Property(property="product_id", type="integer", example=1),
+     *             @OA\Property(property="quantity", type="integer", example=3)
      *         )
      *     ),
      *     @OA\Response(response=200, description="Cập nhật số lượng thành công"),
@@ -144,20 +140,22 @@ class CartController extends Controller
      *     @OA\Response(response=401, description="Chưa xác thực")
      * )
      */
-    public function updateCart(Request $request): JsonResponse
+
+    public function updateCart(Request $request, InventoryService $inventoryService): JsonResponse
     {
         try {
             $data = $request->validate([
-                'items' => 'required|array',
-                'items.*.product_id' => [
+                'product_id' => [
                     'required',
                     'integer',
-                    Rule::exists('cart_items', 'product_id')->where('user_id', auth()->id())
+                    Rule::exists('cart_items', 'product_id')->where(function ($query) {
+                        $query->where('user_id', auth()->id());
+                    }),
                 ],
-                'items.*.quantity' => 'required|integer|min:1'
+                'quantity' => ['required', 'integer', 'min:1', new AvailableStock($request->product_id, $inventoryService)],
             ]);
 
-            $this->cartService->updateMultipleItems($data['items'], auth()->id());
+            $this->cartService->updateItem($data, auth()->id());
 
             return response()->json([
                 'status' => Constant::SUCCESS_CODE,

@@ -36,16 +36,21 @@ class CartService
 
         return $order;
     }
-    public function updateMultipleItems(array $cartItems, int $userId): array
+
+    public function updateItem(array $item, int $userId): array
     {
         DB::beginTransaction();
         try {
-            foreach ($cartItems as $item) {
-                $this->cartRepository->createOrUpdate(
-                    $item,
-                    [['user_id', '=', $userId], ['product_id', '=', $item['product_id']]]
-                );
-            }
+            // Cập nhật số lượng của sản phẩm trong giỏ hàng
+            $this->cartRepository->createOrUpdate(
+                [
+                    'quantity' => $item['quantity']  // Cập nhật số lượng
+                ],
+                [
+                    ['user_id', '=', $userId],
+                    ['product_id', '=', $item['product_id']]
+                ]
+            );
 
             DB::commit();
             return [
@@ -61,4 +66,5 @@ class CartService
             ];
         }
     }
+    
 }

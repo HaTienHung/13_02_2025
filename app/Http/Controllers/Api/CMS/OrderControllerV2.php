@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\CMS;
 use App\Enums\Constant;
 use App\Exports\OrderV2Export;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CMS\OrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\User;
@@ -324,13 +325,13 @@ class OrderControllerV2 extends Controller
      * )
      */
 
-    public function update(Request $request, $id): JsonResponse
+    public function update(OrderRequest $request, $id): JsonResponse
     {
         // Truyền userId (auth()->id()) và items từ request vào phương thức updateOrder
         try {
             // Validate các trường thông tin đầu vào
             $request->validate([
-                'status' => 'required|in:pending,completed,cancelled',
+                'status' => 'required|in:completed,cancelled',
                 //                'items' => 'required|array', // Đảm bảo items là mảng
                 //                'items.*.product_id' => 'required|integer|min:1|exists:products,id', // Kiểm tra sản phẩm tồn tại trong bảng products
                 //                'items.*.quantity' => 'required|integer|min:1', // Kiểm tra số lượng hợp lệ cho từng sản phẩm

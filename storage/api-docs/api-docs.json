@@ -281,24 +281,17 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "items"
+                                    "product_id",
+                                    "quantity"
                                 ],
                                 "properties": {
-                                    "items": {
-                                        "type": "array",
-                                        "items": {
-                                            "properties": {
-                                                "product_id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "quantity": {
-                                                    "type": "integer",
-                                                    "example": 3
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
+                                    "product_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "quantity": {
+                                        "type": "integer",
+                                        "example": 3
                                     }
                                 },
                                 "type": "object"
