@@ -28,7 +28,7 @@ class AvailableStock implements ValidationRule
         //
         $stock = $this->inventoryService->getStock($this->productId);
         if ($value > $stock) {
-            $fail("Chỉ có {$stock} sản phẩm được thêm vào giỏ hàng do giới hạn số lượng còn lại.");
+            $fail("Chỉ có {$stock} sản phẩm có thể thêm vào giỏ hàng do giới hạn số lượng còn lại.");
         }
     }
 }
